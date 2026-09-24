@@ -64,6 +64,11 @@
     .vehicle-photo img{width:100%;height:100%;object-fit:cover;display:block}
     .vehicle-placeholder{font-size:64px;opacity:.6}
     .vehicle-type-badge{position:absolute;left:13px;top:13px;background:rgba(9,7,13,.82);border:1px solid rgba(196,167,255,.25);backdrop-filter:blur(10px)}
+    .sold-badge{position:absolute;right:13px;top:13px;z-index:2;background:rgba(127,29,29,.94);border:1px solid rgba(248,113,113,.65);color:#fecaca;box-shadow:0 0 18px rgba(239,68,68,.32);font-size:.78rem;letter-spacing:.08em}
+    .vehicle-card.is-sold{border-color:rgba(248,113,113,.28)}
+    .vehicle-card.is-sold .vehicle-photo img{filter:saturate(.65) brightness(.78)}
+    .vehicle-card.is-sold .vehicle-placeholder{opacity:.38}
+    .sold-hero-badge{background:rgba(127,29,29,.72);border-color:rgba(248,113,113,.45);color:#fecaca;font-weight:950;letter-spacing:.06em}
     .vehicle-body{padding:16px}
     .vehicle-name{font-size:1.18rem;font-weight:950;color:var(--pink);text-shadow:0 0 10px rgba(255,79,216,.25);margin-bottom:3px;overflow-wrap:anywhere}
     .vehicle-model{font-weight:800;color:#f4ebff}
@@ -361,10 +366,11 @@
     $('garageEmpty').classList.toggle('hidden',state.vehicles.length>0);
     $('garageGrid').innerHTML=state.vehicles.map(v=>{
       const p=latestPms(v.id), url=imageUrl(v.image_path);
-      return `<article class="vehicle-card glass">
+      return `<article class="vehicle-card glass ${v.is_sold?'is-sold':''}">
         <div class="vehicle-photo" role="button" tabindex="0" onclick="openVehicle('${v.id}')">
           ${url?`<img src="${esc(url)}" alt="${esc(v.nickname)}">`:`<div class="vehicle-placeholder">${vehicleEmoji(v.vehicle_type)}</div>`}
           <span class="badge vehicle-type-badge">${esc(v.vehicle_type||'Vehicle')}</span>
+          ${v.is_sold?`<span class="badge sold-badge">🏷️ SOLD</span>`:''}
         </div>
         <div class="vehicle-body">
           <div class="vehicle-name">${esc(v.nickname)}</div>
@@ -393,8 +399,8 @@
     const pms=recordsForVehicle(state.pms), maint=recordsForVehicle(state.maintenance), hist=recordsForVehicle(state.mileage);
     const last=latestPms(v.id), url=imageUrl(v.image_path), totalPms=pms.reduce((s,x)=>s+n(x.total_cost),0), totalMaint=maint.reduce((s,x)=>s+n(x.cost),0), total=totalPms+totalMaint;
     $('vehicleHero').innerHTML=`<div class="hero-photo">${url?`<img src="${esc(url)}" alt="${esc(v.nickname)}">`:`<div class="vehicle-placeholder">${vehicleEmoji(v.vehicle_type)}</div>`}</div>
-      <div class="hero-main"><div><h1 class="hero-name">${esc(v.nickname)}</h1><div style="font-size:1.05rem;font-weight:850">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div><div class="hero-tags"><span class="badge">${esc(v.vehicle_type)}</span>${v.color?`<span class="badge">🎨 ${esc(v.color)}</span>`:''}${v.plate_number?`<span class="badge">${esc(v.plate_number)}</span>`:''}</div></div>
-      <div class="hero-actions"><button class="btn btn-primary" type="button" onclick="openMileageModal()">＋ Update Mileage</button><button class="btn btn-secondary" type="button" onclick="openVehicleModal('${v.id}')">Edit Vehicle</button><button class="btn btn-danger" type="button" onclick="deleteVehicle('${v.id}')">Delete Vehicle</button></div></div>`;
+      <div class="hero-main"><div><h1 class="hero-name">${esc(v.nickname)}</h1><div style="font-size:1.05rem;font-weight:850">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div><div class="hero-tags"><span class="badge">${esc(v.vehicle_type)}</span>${v.color?`<span class="badge">🎨 ${esc(v.color)}</span>`:''}${v.plate_number?`<span class="badge">${esc(v.plate_number)}</span>`:''}${v.is_sold?`<span class="badge sold-hero-badge">🏷️ SOLD</span>`:''}</div></div>
+      <div class="hero-actions"><button class="btn btn-primary" type="button" onclick="openMileageModal()">＋ Update Mileage</button><button class="btn btn-secondary" type="button" onclick="openVehicleModal('${v.id}')">Edit Vehicle</button><button class="btn ${v.is_sold?'btn-success':'btn-danger'}" type="button" onclick="toggleVehicleSold('${v.id}')">${v.is_sold?'↩ Mark as Active Again':'🏷️ Mark as SOLD'}</button><button class="btn btn-danger" type="button" onclick="deleteVehicle('${v.id}')">Delete Vehicle</button></div></div>`;
     $('statsGrid').innerHTML=`
       <div class="stat glass"><div class="stat-label">Current Mileage</div><div class="stat-value stat-violet">${km(v.current_mileage)}</div></div>
       <div class="stat glass"><div class="stat-label">Last PMS</div><div class="stat-value stat-cyan">${last?niceDate(last.service_date):'None yet'}</div><div class="subtle">${last?km(last.mileage):''}</div></div>
@@ -526,6 +532,24 @@
 
   async function addMileageHistory(vehicleId,date,mileage,notes){const {error}=await supabaseClient.from('mileage_history').insert({vehicle_id:vehicleId,reading_date:date,mileage,notes});if(error)throw error;}
   async function bumpMileageIfHigher(vehicleId,mileage,date,notes){const v=state.vehicles.find(x=>x.id===vehicleId);if(v && n(mileage)>n(v.current_mileage)){const {error}=await supabaseClient.from('vehicles').update({current_mileage:mileage,updated_at:new Date().toISOString()}).eq('id',vehicleId);if(error)throw error;await addMileageHistory(vehicleId,date,mileage,notes);}}
+
+  async function toggleVehicleSold(id){
+    const v=state.vehicles.find(x=>x.id===id);if(!v)return;
+    const nextSold=!v.is_sold;
+    const message=nextSold
+      ? `Mark ${v.nickname} as SOLD?\n\nThe vehicle and all of its PMS/repair history will stay in your Garage.`
+      : `Mark ${v.nickname} as active again?`;
+    if(!confirm(message))return;
+    setBusy(true,nextSold?'Marking as sold…':'Restoring vehicle…');
+    try{
+      const {error}=await supabaseClient.from('vehicles').update({is_sold:nextSold,sold_at:nextSold?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq('id',id);
+      if(error)throw error;
+      toast(nextSold?'Vehicle marked as SOLD.':'Vehicle marked as active again.');
+      await loadAll();
+      if(state.currentVehicleId===id)renderVehicle();
+    }catch(e){toast(e.message||'Could not update vehicle status.');}
+    finally{setBusy(false)}
+  }
 
   async function deleteVehicle(id){
     const v=state.vehicles.find(x=>x.id===id);if(!v)return;if(!confirm(`Delete ${v.nickname}?\n\nThis will permanently delete its PMS, parts/repair and mileage history.`))return;setBusy(true,'Deleting…');

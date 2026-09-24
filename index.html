@@ -237,7 +237,7 @@
           <div class="field"><label>Year</label><input id="year" class="input" type="number" min="1900" max="2100" placeholder="2024" /></div>
           <div class="field"><label>Color</label><input id="color" class="input" maxlength="50" placeholder="Black" /></div>
           <div class="field"><label>Plate Number</label><input id="plateNumber" class="input" maxlength="30" placeholder="Optional" /></div>
-          <div class="field"><label>Current Mileage / Odometer *</label><input id="currentMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0" required /></div>
+          <div class="field"><label>Current Mileage / Odometer <span class="subtle">(optional)</span></label><input id="currentMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Leave blank if unknown" /><div class="subtle" style="margin-top:7px">You can add or update the odometer later.</div></div>
         </div>
         <div id="vehicleMessage" class="message"></div>
         <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('vehicleModal')">Cancel</button><button id="saveVehicleBtn" class="btn btn-primary" type="submit">Save Vehicle</button></div>
@@ -320,7 +320,8 @@
   const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const n = v => Number(v || 0);
   const money = v => new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:2}).format(n(v));
-  const km = v => `${new Intl.NumberFormat('en-PH',{maximumFractionDigits:1}).format(n(v))} km`;
+  const hasMileage = v => v !== null && v !== undefined && String(v).trim() !== '';
+  const km = v => hasMileage(v) ? `${new Intl.NumberFormat('en-PH',{maximumFractionDigits:1}).format(Number(v))} km` : 'Not set';
   const niceDate = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}) : '—';
   const today = () => new Date().toISOString().slice(0,10);
 
@@ -453,7 +454,7 @@
 
   function openVehicleModal(id=null){
     clearMsg('vehicleMessage'); $('vehicleForm').reset(); $('vehicleId').value='';$('existingImagePath').value='';$('photoPreview').innerHTML='📷';$('vehicleModalTitle').textContent=id?'Edit Vehicle':'Add Vehicle';
-    if(id){ const v=state.vehicles.find(x=>x.id===id); if(!v)return; $('vehicleId').value=v.id;$('existingImagePath').value=v.image_path||'';$('nickname').value=v.nickname||'';$('vehicleType').value=v.vehicle_type||'Car';$('brand').value=v.brand||'';$('model').value=v.model||'';$('year').value=v.year||'';$('color').value=v.color||'';$('plateNumber').value=v.plate_number||'';$('currentMileage').value=v.current_mileage??0; const u=imageUrl(v.image_path); if(u)$('photoPreview').innerHTML=`<img src="${esc(u)}" alt="Preview">`; }
+    if(id){ const v=state.vehicles.find(x=>x.id===id); if(!v)return; $('vehicleId').value=v.id;$('existingImagePath').value=v.image_path||'';$('nickname').value=v.nickname||'';$('vehicleType').value=v.vehicle_type||'Car';$('brand').value=v.brand||'';$('model').value=v.model||'';$('year').value=v.year||'';$('color').value=v.color||'';$('plateNumber').value=v.plate_number||'';$('currentMileage').value=v.current_mileage??''; const u=imageUrl(v.image_path); if(u)$('photoPreview').innerHTML=`<img src="${esc(u)}" alt="Preview">`; }
     openModal('vehicleModal');
   }
 
@@ -476,9 +477,13 @@
     try{
       const id=$('vehicleId').value || crypto.randomUUID(); const isEdit=!!$('vehicleId').value; let imagePath=$('existingImagePath').value||null; const file=$('vehicleImage').files[0];
       if(file) imagePath=await uploadVehicleImage(file,id);
-      const payload={id,nickname:$('nickname').value.trim(),vehicle_type:$('vehicleType').value,brand:$('brand').value.trim(),model:$('model').value.trim(),year:$('year').value?Number($('year').value):null,color:$('color').value.trim()||null,plate_number:$('plateNumber').value.trim()||null,current_mileage:n($('currentMileage').value),image_path:imagePath,updated_at:new Date().toISOString()};
+      const mileageRaw=$('currentMileage').value.trim();
+      const currentMileage=mileageRaw===''?null:Number(mileageRaw);
+      const previousMileage=(state.vehicles.find(x=>x.id===id)||{}).current_mileage;
+      const payload={id,nickname:$('nickname').value.trim(),vehicle_type:$('vehicleType').value,brand:$('brand').value.trim(),model:$('model').value.trim(),year:$('year').value?Number($('year').value):null,color:$('color').value.trim()||null,plate_number:$('plateNumber').value.trim()||null,current_mileage:currentMileage,image_path:imagePath,updated_at:new Date().toISOString()};
       const q=isEdit?supabaseClient.from('vehicles').update(payload).eq('id',id):supabaseClient.from('vehicles').insert(payload); const {error}=await q;if(error)throw error;
-      if(!isEdit || n($('currentMileage').value)!==n((state.vehicles.find(x=>x.id===id)||{}).current_mileage)) await addMileageHistory(id,today(),n($('currentMileage').value),isEdit?'Mileage updated from vehicle edit':'Initial mileage');
+      const mileageChanged=hasMileage(currentMileage) && (!hasMileage(previousMileage) || Number(currentMileage)!==Number(previousMileage));
+      if((!isEdit && hasMileage(currentMileage)) || (isEdit && mileageChanged)) await addMileageHistory(id,today(),currentMileage,isEdit?'Mileage updated from vehicle edit':'Initial mileage');
       closeModal('vehicleModal');toast(isEdit?'Vehicle updated.':'Vehicle added.');await loadAll(); if(isEdit&&state.currentVehicleId===id)renderVehicle();
     }catch(err){console.error(err);showError('vehicleMessage',err.message||'Could not save vehicle.');}finally{setBusy(false)}
   });
@@ -490,7 +495,7 @@
   $('addPmsItemBtn').onclick=()=>addPmsItemRow();
 
   function openPmsModal(id=null){
-    clearMsg('pmsMessage');$('pmsForm').reset();$('pmsId').value='';$('pmsItemsBox').innerHTML='';$('pmsDate').value=today(); const v=currentVehicle();$('pmsMileage').value=v?.current_mileage??0;$('pmsModalTitle').textContent=id?'Edit PMS':'Add PMS';
+    clearMsg('pmsMessage');$('pmsForm').reset();$('pmsId').value='';$('pmsItemsBox').innerHTML='';$('pmsDate').value=today(); const v=currentVehicle();$('pmsMileage').value=v?.current_mileage??'';$('pmsModalTitle').textContent=id?'Edit PMS':'Add PMS';
     if(id){const p=state.pms.find(x=>x.id===id);if(!p)return;$('pmsId').value=p.id;$('pmsDate').value=p.service_date;$('pmsMileage').value=p.mileage;$('pmsTotal').value=p.total_cost;$('pmsShop').value=p.shop||'';$('pmsNotes').value=p.notes||'';pmsItemsFor(id).forEach(addPmsItemRow);} else addPmsItemRow(); openModal('pmsModal');
   }
 
@@ -507,7 +512,7 @@
   });
 
   function openMaintenanceModal(id=null){
-    clearMsg('maintenanceMessage');$('maintenanceForm').reset();$('maintenanceId').value='';$('maintenanceDate').value=today();const v=currentVehicle();$('maintenanceMileage').value=v?.current_mileage??0;$('maintenanceModalTitle').textContent=id?'Edit Part / Repair':'Add Part / Repair';
+    clearMsg('maintenanceMessage');$('maintenanceForm').reset();$('maintenanceId').value='';$('maintenanceDate').value=today();const v=currentVehicle();$('maintenanceMileage').value=v?.current_mileage??'';$('maintenanceModalTitle').textContent=id?'Edit Part / Repair':'Add Part / Repair';
     if(id){const r=state.maintenance.find(x=>x.id===id);if(!r)return;$('maintenanceId').value=r.id;$('maintenanceDate').value=r.event_date;$('maintenanceMileage').value=r.mileage;$('maintenanceCategory').value=r.category;$('maintenancePart').value=r.part_name;$('maintenancePosition').value=r.position||'';$('maintenanceAction').value=r.action;$('maintenanceCost').value=r.cost??0;$('maintenanceNotes').value=r.notes||'';} openModal('maintenanceModal');
   }
 
@@ -516,7 +521,7 @@
     try{const id=$('maintenanceId').value||crypto.randomUUID(),isEdit=!!$('maintenanceId').value;const payload={id,vehicle_id:v.id,event_date:$('maintenanceDate').value,mileage:n($('maintenanceMileage').value),category:$('maintenanceCategory').value,part_name:$('maintenancePart').value.trim(),position:$('maintenancePosition').value||null,action:$('maintenanceAction').value,cost:n($('maintenanceCost').value),notes:$('maintenanceNotes').value.trim()||null,updated_at:new Date().toISOString()};const q=isEdit?supabaseClient.from('maintenance_records').update(payload).eq('id',id):supabaseClient.from('maintenance_records').insert(payload);const {error}=await q;if(error)throw error;await bumpMileageIfHigher(v.id,payload.mileage,payload.event_date,`Mileage from ${payload.part_name} ${payload.action}`);closeModal('maintenanceModal');toast(isEdit?'Record updated.':'Record added.');await loadAll();renderVehicle();}catch(err){console.error(err);showError('maintenanceMessage',err.message||'Could not save record.');}finally{setBusy(false)}
   });
 
-  function openMileageModal(){const v=currentVehicle();if(!v)return;clearMsg('mileageMessage');$('mileageForm').reset();$('mileageDate').value=today();$('mileageValue').value=v.current_mileage??0;openModal('mileageModal');}
+  function openMileageModal(){const v=currentVehicle();if(!v)return;clearMsg('mileageMessage');$('mileageForm').reset();$('mileageDate').value=today();$('mileageValue').value=v.current_mileage??'';openModal('mileageModal');}
   $('mileageForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const reading=n($('mileageValue').value),date=$('mileageDate').value;const {error}=await supabaseClient.from('vehicles').update({current_mileage:reading,updated_at:new Date().toISOString()}).eq('id',v.id);if(error)throw error;await addMileageHistory(v.id,date,reading,$('mileageNotes').value.trim()||'Manual mileage update');closeModal('mileageModal');toast('Mileage updated.');await loadAll();renderVehicle();}catch(err){showError('mileageMessage',err.message||'Could not update mileage.');}finally{setBusy(false)}});
 
   async function addMileageHistory(vehicleId,date,mileage,notes){const {error}=await supabaseClient.from('mileage_history').insert({vehicle_id:vehicleId,reading_date:date,mileage,notes});if(error)throw error;}

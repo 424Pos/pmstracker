@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#09070d" />
+  <title>My Garage — PMS & Maintenance Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#09070d;
+      --panel:#120d19;
+      --panel2:#181020;
+      --border:#30213d;
+      --violet:#8b5cf6;
+      --lilac:#c4a7ff;
+      --pink:#ff4fd8;
+      --muted:#9d91aa;
+      --green:#4ade80;
+      --red:#fb7185;
+      --orange:#fb923c;
+      --cyan:#67e8f9;
+      --shadow:0 20px 70px rgba(0,0,0,.28);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;min-height:100vh;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at 15% 0%,rgba(139,92,246,.20),transparent 30%),
+        radial-gradient(circle at 90% 10%,rgba(196,167,255,.10),transparent 25%),
+        var(--bg);
+      color:#f8f5ff;
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .hidden{display:none!important}
+    .app{max-width:1280px;margin:auto;padding:22px 16px 70px}
+    .glass{background:rgba(18,13,25,.86);border:1px solid rgba(196,167,255,.14);box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;border-radius:22px;margin-bottom:18px;position:sticky;top:10px;z-index:30}
+    .brand-wrap{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-icon{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#7c3aed,#a78bfa);box-shadow:0 0 28px rgba(139,92,246,.35);font-size:24px}
+    .brand{font-weight:950;letter-spacing:-.04em;font-size:clamp(1.15rem,3vw,1.55rem);white-space:nowrap}
+    .subtle{color:var(--muted);font-size:.84rem}
+    .top-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{min-height:44px;border-radius:12px;padding:0 16px;font-weight:800;border:0;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.18s ease;color:#fff}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+    .btn-primary{background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+    .btn-secondary{background:#191222;border:1px solid #382747;color:#ddd0f0}
+    .btn-danger{background:#39131c;border:1px solid #6e2432;color:#fecdd3}
+    .btn-success{background:#123120;border:1px solid #225f3b;color:#bbf7d0}
+    .btn-small{min-height:34px;height:34px;padding:0 10px;border-radius:9px;font-size:.78rem}
+    .page-title{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:950;letter-spacing:-.04em;margin:0}
+    .pink-title{color:var(--pink);text-shadow:0 0 6px rgba(255,79,216,.55),0 0 16px rgba(255,79,216,.28)}
+    .section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin:18px 2px 14px}
+    .section-title{font-size:1.05rem;font-weight:900;margin:0}
+    .count-pill,.badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;font-size:.76rem;font-weight:800;border:1px solid rgba(196,167,255,.16);background:#17101f;color:#ddd0f0}
+    .garage-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .vehicle-card{border-radius:22px;overflow:hidden;transition:.2s ease;position:relative}
+    .vehicle-card:hover{transform:translateY(-2px);border-color:rgba(196,167,255,.35)}
+    .vehicle-photo{height:210px;background:#0c0910;display:grid;place-items:center;overflow:hidden;position:relative}
+    .vehicle-photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .vehicle-placeholder{font-size:64px;opacity:.6}
+    .vehicle-type-badge{position:absolute;left:13px;top:13px;background:rgba(9,7,13,.82);border:1px solid rgba(196,167,255,.25);backdrop-filter:blur(10px)}
+    .vehicle-body{padding:16px}
+    .vehicle-name{font-size:1.18rem;font-weight:950;color:var(--pink);text-shadow:0 0 10px rgba(255,79,216,.25);margin-bottom:3px;overflow-wrap:anywhere}
+    .vehicle-model{font-weight:800;color:#f4ebff}
+    .meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+    .meta-box{background:#0d0912;border:1px solid #261b31;border-radius:13px;padding:10px;min-width:0}
+    .meta-label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+    .meta-value{font-size:.92rem;font-weight:900;margin-top:3px;overflow-wrap:anywhere}
+    .mileage-value{color:var(--lilac)}
+    .card-actions{display:grid;grid-template-columns:1.4fr .8fr;gap:8px;margin-top:14px}
+    .empty{padding:42px 18px;border-radius:22px;text-align:center;color:var(--muted)}
+    .empty-icon{font-size:54px;margin-bottom:10px}
+
+    /* Vehicle dashboard */
+    .vehicle-hero{display:grid;grid-template-columns:310px 1fr;gap:18px;padding:18px;border-radius:24px;margin-top:12px}
+    .hero-photo{height:225px;border-radius:18px;overflow:hidden;background:#0d0912;display:grid;place-items:center;border:1px solid #2b1d38}
+    .hero-photo img{width:100%;height:100%;object-fit:cover}
+    .hero-main{min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+    .hero-name{font-weight:950;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--pink);letter-spacing:-.04em;text-shadow:0 0 12px rgba(255,79,216,.25);margin:0}
+    .hero-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .hero-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+    .stat{padding:15px;border-radius:17px;min-width:0}
+    .stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+    .stat-value{font-size:1.2rem;font-weight:950;margin-top:5px;overflow-wrap:anywhere}
+    .stat-violet{color:var(--lilac)} .stat-green{color:var(--green)} .stat-orange{color:var(--orange)} .stat-cyan{color:var(--cyan)}
+    .tabs{display:flex;gap:8px;overflow-x:auto;padding:8px;margin-top:16px;border-radius:16px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex:0 0 auto;min-height:40px;border-radius:11px;border:1px solid transparent;background:transparent;color:#b9acc7;padding:0 14px;font-weight:850}
+    .tab.active{background:linear-gradient(135deg,rgba(124,58,237,.55),rgba(167,139,250,.24));border-color:rgba(196,167,255,.30);color:#fff}
+    .tab-panel{margin-top:14px}
+    .panel{border-radius:20px;padding:16px}
+    .panel + .panel{margin-top:14px}
+    .panel-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .panel-title{font-size:1rem;font-weight:950;margin:0}
+    .quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .quick-card{border-radius:16px;padding:14px;background:#0d0912;border:1px solid #281b34}
+    .quick-card .q-label{color:var(--muted);font-size:.74rem;text-transform:uppercase;font-weight:800;letter-spacing:.06em}
+    .quick-card .q-value{font-size:1rem;font-weight:900;margin-top:4px}
+
+    /* tables */
+    .table-wrap{overflow:auto;border:1px solid #2a1d36;border-radius:16px}
+    table{width:100%;border-collapse:collapse;min-width:860px;background:#0d0912}
+    th,td{padding:12px 11px;border-bottom:1px solid #24182e;text-align:left;vertical-align:top;font-size:.85rem}
+    th{position:sticky;top:0;background:#181020;color:#d9c9ed;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;z-index:2}
+    tr:hover td{background:rgba(139,92,246,.035)}
+    .table-actions{display:flex;gap:6px;flex-wrap:wrap}
+    .items-list{margin:0;padding-left:16px;color:#ded2eb}
+    .items-list li+li{margin-top:3px}
+    .money{color:var(--green);font-weight:900}.km{color:var(--lilac);font-weight:900}
+    .note{white-space:pre-wrap;color:#c2b6cf}
+
+    /* modal/forms */
+    .modal{position:fixed;inset:0;background:rgba(2,1,4,.78);display:grid;place-items:center;padding:16px;z-index:100;backdrop-filter:blur(7px)}
+    .modal-card{width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:22px;padding:18px}
+    .modal-wide{width:min(980px,100%)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .modal-title{font-size:1.2rem;font-weight:950;margin:0}
+    .close-btn{width:40px;height:40px;border-radius:12px;border:1px solid #39274a;background:#191222;color:#d7c5e9;font-size:20px}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+    .field.full{grid-column:1/-1}
+    label{font-size:.76rem;color:#c8b8d8;font-weight:800}
+    .input{width:100%;min-height:46px;border-radius:12px;border:1px solid var(--border);background:#0d0912;color:#fff;padding:0 13px;outline:none}
+    .input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.13)}
+    textarea.input{padding-top:12px;min-height:96px;resize:vertical}
+    select.input{appearance:auto}
+    .photo-picker{border:1px dashed #50356a;background:#0d0912;border-radius:15px;padding:12px;display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:center}
+    .photo-preview{height:82px;border-radius:12px;overflow:hidden;background:#17101f;display:grid;place-items:center;border:1px solid #2c1d39}
+    .photo-preview img{width:100%;height:100%;object-fit:cover}
+    .form-actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:16px}
+    .message{font-size:.82rem;margin-top:10px}.error{color:#fda4af}.success{color:#86efac}
+    .pms-items{border:1px solid #2b1d38;border-radius:15px;padding:12px;background:#0d0912}
+    .pms-item-row{display:grid;grid-template-columns:1.2fr 1fr .65fr 40px;gap:8px;align-items:end;margin-bottom:8px}
+    .icon-delete{height:46px;width:40px;border:1px solid #652836;background:#31131a;color:#fecdd3;border-radius:11px}
+    .muted-box{padding:12px;border-radius:13px;background:#0d0912;border:1px solid #281b34;color:var(--muted);font-size:.82rem}
+    .loading{position:fixed;right:14px;bottom:14px;z-index:120;border-radius:12px;padding:10px 13px;background:#181020;border:1px solid #3d2b4c;color:#d7c8e6;box-shadow:var(--shadow);font-size:.82rem}
+    .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:150;max-width:min(92vw,520px);padding:12px 16px;border-radius:13px;background:#181020;border:1px solid #4a345c;box-shadow:var(--shadow);font-weight:800;text-align:center}
+
+    @media (max-width:980px){
+      .garage-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .vehicle-hero{grid-template-columns:240px 1fr}
+      .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .quick-grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:680px){
+      .app{padding:12px 10px 60px}.topbar{top:6px;padding:12px;border-radius:18px;align-items:flex-start}.brand-icon{width:40px;height:40px;border-radius:12px}.subtle.top-sub{display:none}
+      .top-actions .btn-secondary{display:none}.btn{min-height:42px;padding:0 13px}
+      .garage-grid{grid-template-columns:1fr}.vehicle-photo{height:220px}
+      .vehicle-hero{grid-template-columns:1fr;padding:12px}.hero-photo{height:220px}.hero-actions{display:grid;grid-template-columns:1fr 1fr}.hero-actions .btn:first-child{grid-column:1/-1}
+      .stats-grid{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:12px}.stat-value{font-size:1rem}
+      .quick-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+      .modal{padding:8px;align-items:end}.modal-card{max-height:94vh;border-radius:22px 22px 10px 10px;padding:14px}
+      .pms-item-row{grid-template-columns:1fr 1fr}.pms-item-row .field:first-child{grid-column:1/-1}.icon-delete{width:100%}
+      .photo-picker{grid-template-columns:90px 1fr}.section-head{align-items:center}.section-head .btn{font-size:.78rem}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar glass">
+      <div class="brand-wrap">
+        <div class="brand-icon">🚘</div>
+        <div>
+          <div class="brand">My Garage</div>
+          <div class="subtle top-sub">PMS & Maintenance Tracker</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="homeBtn" class="btn btn-secondary hidden" type="button">← Garage</button>
+        <button id="addVehicleTop" class="btn btn-primary" type="button">＋ Add Vehicle</button>
+      </div>
+    </header>
+
+    <section id="garageView">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title pink-title">Your Vehicles</h1>
+          <div class="subtle">Cars, motorcycles and everything you maintain.</div>
+        </div>
+        <span id="vehicleCount" class="count-pill">0 vehicles</span>
+      </div>
+      <div id="garageGrid" class="garage-grid"></div>
+      <div id="garageEmpty" class="empty glass hidden">
+        <div class="empty-icon">🛞</div>
+        <h3 style="margin:0 0 6px;color:#fff">No vehicles yet</h3>
+        <div>Add your first vehicle to start tracking mileage, PMS and repairs.</div>
+        <button class="btn btn-primary" style="margin-top:15px" type="button" onclick="openVehicleModal()">＋ Add Vehicle</button>
+      </div>
+    </section>
+
+    <section id="vehicleView" class="hidden">
+      <div id="vehicleHero" class="vehicle-hero glass"></div>
+      <div id="statsGrid" class="stats-grid"></div>
+
+      <nav class="tabs glass" aria-label="Vehicle sections">
+        <button class="tab active" data-tab="overview" type="button">Overview</button>
+        <button class="tab" data-tab="pms" type="button">PMS History</button>
+        <button class="tab" data-tab="maintenance" type="button">Parts & Repairs</button>
+        <button class="tab" data-tab="mileage" type="button">Mileage History</button>
+      </nav>
+
+      <div id="tab-overview" class="tab-panel"></div>
+      <div id="tab-pms" class="tab-panel hidden"></div>
+      <div id="tab-maintenance" class="tab-panel hidden"></div>
+      <div id="tab-mileage" class="tab-panel hidden"></div>
+    </section>
+  </main>
+
+  <!-- Vehicle modal -->
+  <div id="vehicleModal" class="modal hidden">
+    <div class="modal-card glass">
+      <div class="modal-head"><h2 id="vehicleModalTitle" class="modal-title">Add Vehicle</h2><button class="close-btn" type="button" onclick="closeModal('vehicleModal')">×</button></div>
+      <form id="vehicleForm">
+        <input id="vehicleId" type="hidden" />
+        <input id="existingImagePath" type="hidden" />
+        <div class="form-grid">
+          <div class="field full">
+            <label>Vehicle Image</label>
+            <div class="photo-picker">
+              <div id="photoPreview" class="photo-preview">📷</div>
+              <div>
+                <input id="vehicleImage" class="input" type="file" accept="image/jpeg,image/png,image/webp" />
+                <div class="subtle" style="margin-top:7px">Upload a photo or use your phone camera. The image is compressed before upload.</div>
+              </div>
+            </div>
+          </div>
+          <div class="field"><label>Vehicle Name / Nickname *</label><input id="nickname" class="input" maxlength="80" placeholder="e.g. Creta" required /></div>
+          <div class="field"><label>Vehicle Type *</label><select id="vehicleType" class="input" required><option value="Car">Car</option><option value="Motorcycle">Motorcycle</option><option value="SUV">SUV</option><option value="Pickup">Pickup</option><option value="Van">Van</option><option value="Truck">Truck</option><option value="Scooter">Scooter</option><option value="Other">Other</option></select></div>
+          <div class="field"><label>Brand *</label><input id="brand" class="input" maxlength="80" placeholder="Hyundai" required /></div>
+          <div class="field"><label>Model *</label><input id="model" class="input" maxlength="80" placeholder="Creta" required /></div>
+          <div class="field"><label>Year</label><input id="year" class="input" type="number" min="1900" max="2100" placeholder="2024" /></div>
+          <div class="field"><label>Color</label><input id="color" class="input" maxlength="50" placeholder="Black" /></div>
+          <div class="field"><label>Plate Number</label><input id="plateNumber" class="input" maxlength="30" placeholder="Optional" /></div>
+          <div class="field"><label>Current Mileage / Odometer *</label><input id="currentMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" placeholder="0" required /></div>
+        </div>
+        <div id="vehicleMessage" class="message"></div>
+        <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('vehicleModal')">Cancel</button><button id="saveVehicleBtn" class="btn btn-primary" type="submit">Save Vehicle</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- PMS modal -->
+  <div id="pmsModal" class="modal hidden">
+    <div class="modal-card modal-wide glass">
+      <div class="modal-head"><h2 id="pmsModalTitle" class="modal-title">Add PMS</h2><button class="close-btn" type="button" onclick="closeModal('pmsModal')">×</button></div>
+      <form id="pmsForm">
+        <input id="pmsId" type="hidden" />
+        <div class="form-grid">
+          <div class="field"><label>PMS Date *</label><input id="pmsDate" class="input" type="date" required /></div>
+          <div class="field"><label>Mileage at PMS *</label><input id="pmsMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" required /></div>
+          <div class="field"><label>Total PMS Cost *</label><input id="pmsTotal" class="input" type="number" min="0" step="0.01" inputmode="decimal" required /></div>
+          <div class="field"><label>Shop / Service Center</label><input id="pmsShop" class="input" maxlength="120" placeholder="e.g. Hyundai Service Center" /></div>
+          <div class="field full"><label>Notes</label><textarea id="pmsNotes" class="input" maxlength="1000" placeholder="Anything important about this PMS..."></textarea></div>
+          <div class="field full">
+            <div class="panel-title-row" style="margin-bottom:8px"><label style="font-size:.86rem">What was changed / serviced?</label><button id="addPmsItemBtn" class="btn btn-secondary btn-small" type="button">＋ Add Item</button></div>
+            <div id="pmsItemsBox" class="pms-items"></div>
+          </div>
+        </div>
+        <div id="pmsMessage" class="message"></div>
+        <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('pmsModal')">Cancel</button><button class="btn btn-primary" type="submit">Save PMS</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Maintenance modal -->
+  <div id="maintenanceModal" class="modal hidden">
+    <div class="modal-card glass">
+      <div class="modal-head"><h2 id="maintenanceModalTitle" class="modal-title">Add Part / Repair</h2><button class="close-btn" type="button" onclick="closeModal('maintenanceModal')">×</button></div>
+      <form id="maintenanceForm">
+        <input id="maintenanceId" type="hidden" />
+        <div class="form-grid">
+          <div class="field"><label>Date *</label><input id="maintenanceDate" class="input" type="date" required /></div>
+          <div class="field"><label>Mileage *</label><input id="maintenanceMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" required /></div>
+          <div class="field"><label>Category *</label><select id="maintenanceCategory" class="input" required><option>Tires</option><option>Battery</option><option>Brakes</option><option>Fluids</option><option>Filters</option><option>Engine</option><option>Transmission</option><option>Electrical</option><option>Suspension</option><option>Chain / Sprocket</option><option>CVT</option><option>Body / Exterior</option><option>Other</option></select></div>
+          <div class="field"><label>Part / Item *</label><input id="maintenancePart" class="input" maxlength="120" placeholder="e.g. Front Left Tire" required /></div>
+          <div class="field"><label>Position</label><select id="maintenancePosition" class="input"><option value="">Not applicable</option><option>Front Left</option><option>Front Right</option><option>Rear Left</option><option>Rear Right</option><option>Front</option><option>Rear</option><option>Spare</option><option>All</option><option>Other</option></select></div>
+          <div class="field"><label>Action / Event *</label><select id="maintenanceAction" class="input" required><option>Replaced</option><option>Patched</option><option>Repaired</option><option>Cleaned</option><option>Adjusted</option><option>Installed</option><option>Inspected</option><option>Refilled</option><option>Other</option></select></div>
+          <div class="field"><label>Cost</label><input id="maintenanceCost" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0" /></div>
+          <div class="field full"><label>Notes</label><textarea id="maintenanceNotes" class="input" maxlength="1000" placeholder="e.g. Nail puncture, patched at vulcanizing shop"></textarea></div>
+        </div>
+        <div id="maintenanceMessage" class="message"></div>
+        <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('maintenanceModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Record</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mileage modal -->
+  <div id="mileageModal" class="modal hidden">
+    <div class="modal-card glass" style="width:min(560px,100%)">
+      <div class="modal-head"><h2 class="modal-title">Update Mileage</h2><button class="close-btn" type="button" onclick="closeModal('mileageModal')">×</button></div>
+      <form id="mileageForm">
+        <div class="form-grid">
+          <div class="field"><label>Date *</label><input id="mileageDate" class="input" type="date" required /></div>
+          <div class="field"><label>Odometer *</label><input id="mileageValue" class="input" type="number" min="0" step="0.1" inputmode="decimal" required /></div>
+          <div class="field full"><label>Notes</label><input id="mileageNotes" class="input" maxlength="300" placeholder="Optional" /></div>
+        </div>
+        <div id="mileageMessage" class="message"></div>
+        <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('mileageModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Mileage</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="loading" class="loading hidden">Saving…</div>
+  <div id="toast" class="toast hidden"></div>
+
+<script>
+  const SUPABASE_URL = "https://lvzveqvthndrqdnzkibn.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_91IxkckPPrM-hyOJPjO6nQ_Omy29TBK";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const IMAGE_BUCKET = "vehicle-images";
+
+  const state = { vehicles:[], pms:[], pmsItems:[], maintenance:[], mileage:[], currentVehicleId:null, activeTab:"overview" };
+  const $ = id => document.getElementById(id);
+  const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const n = v => Number(v || 0);
+  const money = v => new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:2}).format(n(v));
+  const km = v => `${new Intl.NumberFormat('en-PH',{maximumFractionDigits:1}).format(n(v))} km`;
+  const niceDate = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}) : '—';
+  const today = () => new Date().toISOString().slice(0,10);
+
+  function setBusy(on,text='Saving…'){ $('loading').textContent=text; $('loading').classList.toggle('hidden',!on); }
+  function toast(msg){ const t=$('toast'); t.textContent=msg;t.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.add('hidden'),2600); }
+  function showError(id,msg){ const el=$(id);el.textContent=msg;el.className='message error'; }
+  function clearMsg(id){ const el=$(id);el.textContent='';el.className='message'; }
+  function closeModal(id){ $(id).classList.add('hidden'); }
+  function openModal(id){ $(id).classList.remove('hidden'); }
+
+  function vehicleEmoji(type=''){ const x=type.toLowerCase(); if(x.includes('motor')||x.includes('scooter'))return '🏍️'; if(x.includes('truck')||x.includes('pickup'))return '🛻'; if(x.includes('van'))return '🚐'; return '🚘'; }
+  function imageUrl(path){ if(!path)return ''; return supabaseClient.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl; }
+  function currentVehicle(){ return state.vehicles.find(v=>v.id===state.currentVehicleId); }
+  function recordsForVehicle(arr){ return arr.filter(x=>x.vehicle_id===state.currentVehicleId); }
+  function latestPms(vehicleId){ return state.pms.filter(x=>x.vehicle_id===vehicleId).sort((a,b)=>String(b.service_date).localeCompare(String(a.service_date)) || n(b.mileage)-n(a.mileage))[0] || null; }
+  function pmsItemsFor(pmsId){ return state.pmsItems.filter(x=>x.pms_id===pmsId); }
+
+  async function loadAll(){
+    setBusy(true,'Loading…');
+    try{
+      const [vr,pr,ir,mr,hr]=await Promise.all([
+        supabaseClient.from('vehicles').select('*').order('created_at',{ascending:true}),
+        supabaseClient.from('pms_records').select('*').order('service_date',{ascending:false}),
+        supabaseClient.from('pms_items').select('*').order('created_at',{ascending:true}),
+        supabaseClient.from('maintenance_records').select('*').order('event_date',{ascending:false}),
+        supabaseClient.from('mileage_history').select('*').order('reading_date',{ascending:false})
+      ]);
+      const bad=[vr,pr,ir,mr,hr].find(x=>x.error); if(bad) throw bad.error;
+      state.vehicles=vr.data||[]; state.pms=pr.data||[]; state.pmsItems=ir.data||[]; state.maintenance=mr.data||[]; state.mileage=hr.data||[];
+      renderGarage(); if(state.currentVehicleId && state.vehicles.some(v=>v.id===state.currentVehicleId)) renderVehicle();
+    }catch(e){ console.error(e); toast('Database not ready. Run supabase_setup.sql first.'); }
+    finally{setBusy(false)}
+  }
+
+  function renderGarage(){
+    $('vehicleCount').textContent=`${state.vehicles.length} ${state.vehicles.length===1?'vehicle':'vehicles'}`;
+    $('garageEmpty').classList.toggle('hidden',state.vehicles.length>0);
+    $('garageGrid').innerHTML=state.vehicles.map(v=>{
+      const p=latestPms(v.id), url=imageUrl(v.image_path);
+      return `<article class="vehicle-card glass">
+        <div class="vehicle-photo" role="button" tabindex="0" onclick="openVehicle('${v.id}')">
+          ${url?`<img src="${esc(url)}" alt="${esc(v.nickname)}">`:`<div class="vehicle-placeholder">${vehicleEmoji(v.vehicle_type)}</div>`}
+          <span class="badge vehicle-type-badge">${esc(v.vehicle_type||'Vehicle')}</span>
+        </div>
+        <div class="vehicle-body">
+          <div class="vehicle-name">${esc(v.nickname)}</div>
+          <div class="vehicle-model">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div>
+          <div class="subtle">${esc(v.color||'Color not set')}${v.plate_number?` • ${esc(v.plate_number)}`:''}</div>
+          <div class="meta-grid">
+            <div class="meta-box"><div class="meta-label">Mileage</div><div class="meta-value mileage-value">${km(v.current_mileage)}</div></div>
+            <div class="meta-box"><div class="meta-label">Last PMS</div><div class="meta-value">${p?`${niceDate(p.service_date)}<br><span class="subtle">${km(p.mileage)}</span>`:'No PMS yet'}</div></div>
+          </div>
+          <div class="card-actions"><button class="btn btn-primary" type="button" onclick="openVehicle('${v.id}')">Open Vehicle</button><button class="btn btn-secondary" type="button" onclick="event.stopPropagation();openVehicleModal('${v.id}')">Edit</button></div>
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  function openVehicle(id){
+    state.currentVehicleId=id; state.activeTab='overview';
+    $('garageView').classList.add('hidden'); $('vehicleView').classList.remove('hidden'); $('homeBtn').classList.remove('hidden'); $('addVehicleTop').classList.add('hidden');
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='overview'));
+    renderVehicle(); window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function backToGarage(){ state.currentVehicleId=null;$('vehicleView').classList.add('hidden');$('garageView').classList.remove('hidden');$('homeBtn').classList.add('hidden');$('addVehicleTop').classList.remove('hidden');renderGarage();window.scrollTo({top:0,behavior:'smooth'}); }
+
+  function renderVehicle(){
+    const v=currentVehicle(); if(!v){backToGarage();return}
+    const pms=recordsForVehicle(state.pms), maint=recordsForVehicle(state.maintenance), hist=recordsForVehicle(state.mileage);
+    const last=latestPms(v.id), url=imageUrl(v.image_path), totalPms=pms.reduce((s,x)=>s+n(x.total_cost),0), totalMaint=maint.reduce((s,x)=>s+n(x.cost),0), total=totalPms+totalMaint;
+    $('vehicleHero').innerHTML=`<div class="hero-photo">${url?`<img src="${esc(url)}" alt="${esc(v.nickname)}">`:`<div class="vehicle-placeholder">${vehicleEmoji(v.vehicle_type)}</div>`}</div>
+      <div class="hero-main"><div><h1 class="hero-name">${esc(v.nickname)}</h1><div style="font-size:1.05rem;font-weight:850">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div><div class="hero-tags"><span class="badge">${esc(v.vehicle_type)}</span>${v.color?`<span class="badge">🎨 ${esc(v.color)}</span>`:''}${v.plate_number?`<span class="badge">${esc(v.plate_number)}</span>`:''}</div></div>
+      <div class="hero-actions"><button class="btn btn-primary" type="button" onclick="openMileageModal()">＋ Update Mileage</button><button class="btn btn-secondary" type="button" onclick="openVehicleModal('${v.id}')">Edit Vehicle</button><button class="btn btn-danger" type="button" onclick="deleteVehicle('${v.id}')">Delete Vehicle</button></div></div>`;
+    $('statsGrid').innerHTML=`
+      <div class="stat glass"><div class="stat-label">Current Mileage</div><div class="stat-value stat-violet">${km(v.current_mileage)}</div></div>
+      <div class="stat glass"><div class="stat-label">Last PMS</div><div class="stat-value stat-cyan">${last?niceDate(last.service_date):'None yet'}</div><div class="subtle">${last?km(last.mileage):''}</div></div>
+      <div class="stat glass"><div class="stat-label">Last PMS Cost</div><div class="stat-value stat-green">${last?money(last.total_cost):'—'}</div></div>
+      <div class="stat glass"><div class="stat-label">Total Recorded Spend</div><div class="stat-value stat-orange">${money(total)}</div></div>`;
+    renderOverview(v,pms,maint,hist,last,totalPms,totalMaint);
+    renderPms(pms); renderMaintenance(maint); renderMileage(hist);
+    showTab(state.activeTab);
+  }
+
+  function renderOverview(v,pms,maint,hist,last,totalPms,totalMaint){
+    const recentMaint=[...maint].sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date))).slice(0,5);
+    const recentPms=[...pms].sort((a,b)=>String(b.service_date).localeCompare(String(a.service_date))).slice(0,3);
+    $('tab-overview').innerHTML=`
+      <div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Quick Summary</h3></div><div class="quick-grid">
+        <div class="quick-card"><div class="q-label">PMS Records</div><div class="q-value">${pms.length}</div></div>
+        <div class="quick-card"><div class="q-label">Parts / Repair Records</div><div class="q-value">${maint.length}</div></div>
+        <div class="quick-card"><div class="q-label">Mileage Updates</div><div class="q-value">${hist.length}</div></div>
+        <div class="quick-card"><div class="q-label">PMS Spending</div><div class="q-value money">${money(totalPms)}</div></div>
+        <div class="quick-card"><div class="q-label">Repair / Parts Spending</div><div class="q-value money">${money(totalMaint)}</div></div>
+        <div class="quick-card"><div class="q-label">Last PMS Mileage</div><div class="q-value km">${last?km(last.mileage):'—'}</div></div>
+      </div></div>
+      <div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Recent PMS</h3><button class="btn btn-primary btn-small" type="button" onclick="openPmsModal()">＋ Add PMS</button></div>
+        ${recentPms.length?miniPmsTable(recentPms):`<div class="muted-box">No PMS records yet.</div>`}
+      </div>
+      <div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Recent Parts & Repairs</h3><button class="btn btn-primary btn-small" type="button" onclick="openMaintenanceModal()">＋ Add Record</button></div>
+        ${recentMaint.length?miniMaintTable(recentMaint):`<div class="muted-box">No repair or parts records yet.</div>`}
+      </div>`;
+  }
+
+  function miniPmsTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Mileage</th><th>Changed / Serviced</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.service_date)}</td><td class="km">${km(r.mileage)}</td><td>${itemSummary(r.id)}</td><td class="money">${money(r.total_cost)}</td></tr>`).join('')}</tbody></table></div>`; }
+  function miniMaintTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Item</th><th>Event</th><th>Mileage</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.event_date)}</td><td><b>${esc(r.part_name)}</b>${r.position?`<div class="subtle">${esc(r.position)}</div>`:''}</td><td>${esc(r.action)}</td><td class="km">${km(r.mileage)}</td><td class="money">${money(r.cost)}</td></tr>`).join('')}</tbody></table></div>`; }
+  function itemSummary(pmsId){ const items=pmsItemsFor(pmsId); if(!items.length)return '<span class="subtle">No item details</span>'; return `<ul class="items-list">${items.map(i=>`<li><b>${esc(i.item_name)}</b> — ${esc(i.action)}${n(i.cost)>0?` (${money(i.cost)})`:''}</li>`).join('')}</ul>`; }
+
+  function renderPms(rows){
+    const sorted=[...rows].sort((a,b)=>String(b.service_date).localeCompare(String(a.service_date)) || n(b.mileage)-n(a.mileage));
+    $('tab-pms').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">PMS History</h3><div class="subtle">Full preventive-maintenance history for this vehicle.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openPmsModal()">＋ Add PMS</button></div>
+      ${sorted.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Mileage</th><th>Changed / Serviced</th><th>Shop</th><th>Total</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>`<tr><td>${niceDate(r.service_date)}</td><td class="km">${km(r.mileage)}</td><td>${itemSummary(r.id)}</td><td>${esc(r.shop||'—')}</td><td class="money">${money(r.total_cost)}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openPmsModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deletePms('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No PMS records yet. Add the first service to start the history.</div>`}
+    </div>`;
+  }
+
+  function renderMaintenance(rows){
+    const sorted=[...rows].sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date)) || n(b.mileage)-n(a.mileage));
+    $('tab-maintenance').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Parts & Repairs</h3><div class="subtle">Tire patches, replacements, battery, brakes and any other work.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openMaintenanceModal()">＋ Add Record</button></div>
+      ${sorted.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Part / Position</th><th>Action</th><th>Mileage</th><th>Cost</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>`<tr><td>${niceDate(r.event_date)}</td><td><span class="badge">${esc(r.category)}</span></td><td><b>${esc(r.part_name)}</b>${r.position?`<div class="subtle">${esc(r.position)}</div>`:''}</td><td>${esc(r.action)}</td><td class="km">${km(r.mileage)}</td><td class="money">${money(r.cost)}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openMaintenanceModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteMaintenance('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No parts or repair records yet.</div>`}
+    </div>`;
+  }
+
+  function renderMileage(rows){
+    const sorted=[...rows].sort((a,b)=>String(b.reading_date).localeCompare(String(a.reading_date)) || n(b.mileage)-n(a.mileage));
+    $('tab-mileage').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Mileage History</h3><div class="subtle">Previous odometer readings stay recorded instead of being overwritten.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openMileageModal()">＋ Update Mileage</button></div>
+      ${sorted.length?`<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Mileage</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>`<tr><td>${niceDate(r.reading_date)}</td><td class="km">${km(r.mileage)}</td><td>${esc(r.notes||'—')}</td><td><button class="btn btn-danger btn-small" type="button" onclick="deleteMileage('${r.id}')">Delete</button></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No separate mileage updates yet.</div>`}
+    </div>`;
+  }
+
+  function showTab(name){ state.activeTab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name)); ['overview','pms','maintenance','mileage'].forEach(x=>$(`tab-${x}`).classList.toggle('hidden',x!==name)); }
+
+  function openVehicleModal(id=null){
+    clearMsg('vehicleMessage'); $('vehicleForm').reset(); $('vehicleId').value='';$('existingImagePath').value='';$('photoPreview').innerHTML='📷';$('vehicleModalTitle').textContent=id?'Edit Vehicle':'Add Vehicle';
+    if(id){ const v=state.vehicles.find(x=>x.id===id); if(!v)return; $('vehicleId').value=v.id;$('existingImagePath').value=v.image_path||'';$('nickname').value=v.nickname||'';$('vehicleType').value=v.vehicle_type||'Car';$('brand').value=v.brand||'';$('model').value=v.model||'';$('year').value=v.year||'';$('color').value=v.color||'';$('plateNumber').value=v.plate_number||'';$('currentMileage').value=v.current_mileage??0; const u=imageUrl(v.image_path); if(u)$('photoPreview').innerHTML=`<img src="${esc(u)}" alt="Preview">`; }
+    openModal('vehicleModal');
+  }
+
+  $('vehicleImage').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f)return; const u=URL.createObjectURL(f);$('photoPreview').innerHTML=`<img src="${u}" alt="Preview">`; });
+
+  async function compressImage(file){
+    if(!file || !file.type.startsWith('image/')) return file;
+    try{
+      const bmp=await createImageBitmap(file); const maxW=1600,maxH=1200,scale=Math.min(1,maxW/bmp.width,maxH/bmp.height); const w=Math.round(bmp.width*scale),h=Math.round(bmp.height*scale); const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(bmp,0,0,w,h); const blob=await new Promise(res=>c.toBlob(res,'image/jpeg',.82)); return new File([blob],(file.name.replace(/\.[^.]+$/,'')||'vehicle')+'.jpg',{type:'image/jpeg'});
+    }catch{return file}
+  }
+
+  async function uploadVehicleImage(file,vehicleId){
+    const processed=await compressImage(file); const ext=(processed.name.split('.').pop()||'jpg').toLowerCase(); const path=`${vehicleId}/${Date.now()}.${ext}`;
+    const {error}=await supabaseClient.storage.from(IMAGE_BUCKET).upload(path,processed,{cacheControl:'3600',upsert:false,contentType:processed.type}); if(error)throw error; return path;
+  }
+
+  $('vehicleForm').addEventListener('submit',async e=>{
+    e.preventDefault();clearMsg('vehicleMessage');setBusy(true);
+    try{
+      const id=$('vehicleId').value || crypto.randomUUID(); const isEdit=!!$('vehicleId').value; let imagePath=$('existingImagePath').value||null; const file=$('vehicleImage').files[0];
+      if(file) imagePath=await uploadVehicleImage(file,id);
+      const payload={id,nickname:$('nickname').value.trim(),vehicle_type:$('vehicleType').value,brand:$('brand').value.trim(),model:$('model').value.trim(),year:$('year').value?Number($('year').value):null,color:$('color').value.trim()||null,plate_number:$('plateNumber').value.trim()||null,current_mileage:n($('currentMileage').value),image_path:imagePath,updated_at:new Date().toISOString()};
+      const q=isEdit?supabaseClient.from('vehicles').update(payload).eq('id',id):supabaseClient.from('vehicles').insert(payload); const {error}=await q;if(error)throw error;
+      if(!isEdit || n($('currentMileage').value)!==n((state.vehicles.find(x=>x.id===id)||{}).current_mileage)) await addMileageHistory(id,today(),n($('currentMileage').value),isEdit?'Mileage updated from vehicle edit':'Initial mileage');
+      closeModal('vehicleModal');toast(isEdit?'Vehicle updated.':'Vehicle added.');await loadAll(); if(isEdit&&state.currentVehicleId===id)renderVehicle();
+    }catch(err){console.error(err);showError('vehicleMessage',err.message||'Could not save vehicle.');}finally{setBusy(false)}
+  });
+
+  function addPmsItemRow(item={}){
+    const row=document.createElement('div');row.className='pms-item-row';row.innerHTML=`<div class="field"><label>Item / Part</label><input class="input pms-item-name" maxlength="120" placeholder="Engine Oil" value="${esc(item.item_name||'')}"></div><div class="field"><label>Action</label><select class="input pms-item-action"><option>Changed</option><option>Replaced</option><option>Cleaned</option><option>Inspected</option><option>Adjusted</option><option>Refilled</option><option>Other</option></select></div><div class="field"><label>Item Cost</label><input class="input pms-item-cost" type="number" min="0" step="0.01" value="${item.cost??''}" placeholder="0"></div><button class="icon-delete" type="button" title="Remove item">×</button>`;
+    row.querySelector('.pms-item-action').value=item.action||'Changed'; row.querySelector('.icon-delete').onclick=()=>{if(confirm('Remove this PMS item?'))row.remove();}; $('pmsItemsBox').appendChild(row);
+  }
+  $('addPmsItemBtn').onclick=()=>addPmsItemRow();
+
+  function openPmsModal(id=null){
+    clearMsg('pmsMessage');$('pmsForm').reset();$('pmsId').value='';$('pmsItemsBox').innerHTML='';$('pmsDate').value=today(); const v=currentVehicle();$('pmsMileage').value=v?.current_mileage??0;$('pmsModalTitle').textContent=id?'Edit PMS':'Add PMS';
+    if(id){const p=state.pms.find(x=>x.id===id);if(!p)return;$('pmsId').value=p.id;$('pmsDate').value=p.service_date;$('pmsMileage').value=p.mileage;$('pmsTotal').value=p.total_cost;$('pmsShop').value=p.shop||'';$('pmsNotes').value=p.notes||'';pmsItemsFor(id).forEach(addPmsItemRow);} else addPmsItemRow(); openModal('pmsModal');
+  }
+
+  $('pmsForm').addEventListener('submit',async e=>{
+    e.preventDefault();clearMsg('pmsMessage');const v=currentVehicle();if(!v)return;setBusy(true);
+    try{
+      const id=$('pmsId').value||crypto.randomUUID(),isEdit=!!$('pmsId').value; const payload={id,vehicle_id:v.id,service_date:$('pmsDate').value,mileage:n($('pmsMileage').value),total_cost:n($('pmsTotal').value),shop:$('pmsShop').value.trim()||null,notes:$('pmsNotes').value.trim()||null,updated_at:new Date().toISOString()};
+      const q=isEdit?supabaseClient.from('pms_records').update(payload).eq('id',id):supabaseClient.from('pms_records').insert(payload);const {error}=await q;if(error)throw error;
+      if(isEdit){const {error:de}=await supabaseClient.from('pms_items').delete().eq('pms_id',id);if(de)throw de;}
+      const items=[...document.querySelectorAll('#pmsItemsBox .pms-item-row')].map(r=>({pms_id:id,item_name:r.querySelector('.pms-item-name').value.trim(),action:r.querySelector('.pms-item-action').value,cost:n(r.querySelector('.pms-item-cost').value)})).filter(x=>x.item_name);
+      if(items.length){const {error:ie}=await supabaseClient.from('pms_items').insert(items);if(ie)throw ie;}
+      await bumpMileageIfHigher(v.id,payload.mileage,payload.service_date,'Mileage from PMS');closeModal('pmsModal');toast(isEdit?'PMS updated.':'PMS added.');await loadAll();renderVehicle();
+    }catch(err){console.error(err);showError('pmsMessage',err.message||'Could not save PMS.');}finally{setBusy(false)}
+  });
+
+  function openMaintenanceModal(id=null){
+    clearMsg('maintenanceMessage');$('maintenanceForm').reset();$('maintenanceId').value='';$('maintenanceDate').value=today();const v=currentVehicle();$('maintenanceMileage').value=v?.current_mileage??0;$('maintenanceModalTitle').textContent=id?'Edit Part / Repair':'Add Part / Repair';
+    if(id){const r=state.maintenance.find(x=>x.id===id);if(!r)return;$('maintenanceId').value=r.id;$('maintenanceDate').value=r.event_date;$('maintenanceMileage').value=r.mileage;$('maintenanceCategory').value=r.category;$('maintenancePart').value=r.part_name;$('maintenancePosition').value=r.position||'';$('maintenanceAction').value=r.action;$('maintenanceCost').value=r.cost??0;$('maintenanceNotes').value=r.notes||'';} openModal('maintenanceModal');
+  }
+
+  $('maintenanceForm').addEventListener('submit',async e=>{
+    e.preventDefault();clearMsg('maintenanceMessage');const v=currentVehicle();if(!v)return;setBusy(true);
+    try{const id=$('maintenanceId').value||crypto.randomUUID(),isEdit=!!$('maintenanceId').value;const payload={id,vehicle_id:v.id,event_date:$('maintenanceDate').value,mileage:n($('maintenanceMileage').value),category:$('maintenanceCategory').value,part_name:$('maintenancePart').value.trim(),position:$('maintenancePosition').value||null,action:$('maintenanceAction').value,cost:n($('maintenanceCost').value),notes:$('maintenanceNotes').value.trim()||null,updated_at:new Date().toISOString()};const q=isEdit?supabaseClient.from('maintenance_records').update(payload).eq('id',id):supabaseClient.from('maintenance_records').insert(payload);const {error}=await q;if(error)throw error;await bumpMileageIfHigher(v.id,payload.mileage,payload.event_date,`Mileage from ${payload.part_name} ${payload.action}`);closeModal('maintenanceModal');toast(isEdit?'Record updated.':'Record added.');await loadAll();renderVehicle();}catch(err){console.error(err);showError('maintenanceMessage',err.message||'Could not save record.');}finally{setBusy(false)}
+  });
+
+  function openMileageModal(){const v=currentVehicle();if(!v)return;clearMsg('mileageMessage');$('mileageForm').reset();$('mileageDate').value=today();$('mileageValue').value=v.current_mileage??0;openModal('mileageModal');}
+  $('mileageForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const reading=n($('mileageValue').value),date=$('mileageDate').value;const {error}=await supabaseClient.from('vehicles').update({current_mileage:reading,updated_at:new Date().toISOString()}).eq('id',v.id);if(error)throw error;await addMileageHistory(v.id,date,reading,$('mileageNotes').value.trim()||'Manual mileage update');closeModal('mileageModal');toast('Mileage updated.');await loadAll();renderVehicle();}catch(err){showError('mileageMessage',err.message||'Could not update mileage.');}finally{setBusy(false)}});
+
+  async function addMileageHistory(vehicleId,date,mileage,notes){const {error}=await supabaseClient.from('mileage_history').insert({vehicle_id:vehicleId,reading_date:date,mileage,notes});if(error)throw error;}
+  async function bumpMileageIfHigher(vehicleId,mileage,date,notes){const v=state.vehicles.find(x=>x.id===vehicleId);if(v && n(mileage)>n(v.current_mileage)){const {error}=await supabaseClient.from('vehicles').update({current_mileage:mileage,updated_at:new Date().toISOString()}).eq('id',vehicleId);if(error)throw error;await addMileageHistory(vehicleId,date,mileage,notes);}}
+
+  async function deleteVehicle(id){
+    const v=state.vehicles.find(x=>x.id===id);if(!v)return;if(!confirm(`Delete ${v.nickname}?\n\nThis will permanently delete its PMS, parts/repair and mileage history.`))return;setBusy(true,'Deleting…');
+    try{const {error}=await supabaseClient.from('vehicles').delete().eq('id',id);if(error)throw error;if(v.image_path){await supabaseClient.storage.from(IMAGE_BUCKET).remove([v.image_path]);}toast('Vehicle deleted.');backToGarage();await loadAll();}catch(e){toast(e.message||'Delete failed.');}finally{setBusy(false)}
+  }
+  async function deletePms(id){if(!confirm('Delete this PMS record and its itemized changes?'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('pms_records').delete().eq('id',id);if(error)throw error;toast('PMS deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
+  async function deleteMaintenance(id){if(!confirm('Delete this parts/repair record?'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('maintenance_records').delete().eq('id',id);if(error)throw error;toast('Record deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
+  async function deleteMileage(id){if(!confirm('Delete this mileage history entry? This will not change the vehicle current mileage.'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('mileage_history').delete().eq('id',id);if(error)throw error;toast('Mileage entry deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
+
+  $('homeBtn').onclick=backToGarage;$('addVehicleTop').onclick=()=>openVehicleModal();document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
+  document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden')}));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'))});
+
+  loadAll();
+</script>
+</body>
+</html>

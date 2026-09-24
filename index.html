@@ -317,15 +317,15 @@
       <form id="maintenanceForm">
         <input id="maintenanceId" type="hidden" />
         <div class="form-grid">
-          <div class="field"><label>Date *</label><input id="maintenanceDate" class="input" type="date" required /></div>
-          <div class="field"><label>Mileage *</label><input id="maintenanceMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" required /></div>
-          <div class="field"><label>Category *</label><select id="maintenanceCategory" class="input" required><option>Tires</option><option>Battery</option><option>Brakes</option><option>Fluids</option><option>Filters</option><option>Engine</option><option>Transmission</option><option>Electrical</option><option>Suspension</option><option>Chain / Sprocket</option><option>CVT</option><option>Body / Exterior</option><option>Other</option></select></div>
-          <div class="field"><label>Part / Item *</label><input id="maintenancePart" class="input" maxlength="120" placeholder="e.g. Front Left Tire" required /></div>
-          <div class="field"><label>Position</label><select id="maintenancePosition" class="input"><option value="">Not applicable</option><option>Front Left</option><option>Front Right</option><option>Rear Left</option><option>Rear Right</option><option>Front</option><option>Rear</option><option>Spare</option><option>All</option><option>Other</option></select></div>
-          <div class="field"><label>Action / Event *</label><select id="maintenanceAction" class="input" required><option>Replaced</option><option>Patched</option><option>Repaired</option><option>Cleaned</option><option>Adjusted</option><option>Installed</option><option>Inspected</option><option>Refilled</option><option>Other</option></select></div>
-          <div class="field"><label>Cost</label><input id="maintenanceCost" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0" /></div>
-          <div class="field"><label>Shop / Mechanic</label><input id="maintenanceShop" class="input" list="shopList" maxlength="120" placeholder="Optional" /></div>
-          <div class="field full"><label>Notes</label><textarea id="maintenanceNotes" class="input" maxlength="1000" placeholder="e.g. Nail puncture, patched at vulcanizing shop"></textarea></div>
+          <div class="field"><label>Date <span class="subtle">(optional)</span></label><input id="maintenanceDate" class="input" type="date" /></div>
+          <div class="field"><label>Mileage <span class="subtle">(optional)</span></label><input id="maintenanceMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Unknown / optional" /></div>
+          <div class="field"><label>Category <span class="subtle">(optional)</span></label><select id="maintenanceCategory" class="input"><option value="">Not set</option><option>Tires</option><option>Battery</option><option>Brakes</option><option>Fluids</option><option>Filters</option><option>Engine</option><option>Transmission</option><option>Electrical</option><option>Suspension</option><option>Chain / Sprocket</option><option>CVT</option><option>Body / Exterior</option><option>Other</option></select></div>
+          <div class="field"><label>Part / Item <span class="subtle">(optional)</span></label><input id="maintenancePart" class="input" maxlength="120" placeholder="e.g. Front Left Tire" /></div>
+          <div class="field"><label>Position <span class="subtle">(optional)</span></label><select id="maintenancePosition" class="input"><option value="">Not applicable</option><option>Front Left</option><option>Front Right</option><option>Rear Left</option><option>Rear Right</option><option>Front</option><option>Rear</option><option>Spare</option><option>All</option><option>Other</option></select></div>
+          <div class="field"><label>Action / Event <span class="subtle">(optional)</span></label><select id="maintenanceAction" class="input"><option value="">Not set</option><option>Replaced</option><option>Patched</option><option>Repaired</option><option>Cleaned</option><option>Adjusted</option><option>Installed</option><option>Inspected</option><option>Refilled</option><option>Other</option></select></div>
+          <div class="field"><label>Cost <span class="subtle">(optional)</span></label><input id="maintenanceCost" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Unknown / optional" /></div>
+          <div class="field"><label>Shop / Mechanic <span class="subtle">(optional)</span></label><input id="maintenanceShop" class="input" list="shopList" maxlength="120" placeholder="Optional" /></div>
+          <div class="field full"><label>Notes <span class="subtle">(optional)</span></label><textarea id="maintenanceNotes" class="input" maxlength="1000" placeholder="e.g. Nail puncture, patched at vulcanizing shop"></textarea></div>
         </div>
         <div id="maintenanceMessage" class="message"></div>
         <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('maintenanceModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Record</button></div>
@@ -616,7 +616,7 @@
   }
 
   function miniPmsTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Mileage</th><th>Changed / Serviced</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.service_date)}</td><td class="km">${km(r.mileage)}</td><td>${itemSummary(r.id)}</td><td class="money">${moneyOptional(r.total_cost)}</td></tr>`).join('')}</tbody></table></div>`; }
-  function miniMaintTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Item</th><th>Event</th><th>Mileage</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.event_date)}</td><td><b>${esc(r.part_name)}</b>${r.position?`<div class="subtle">${esc(r.position)}</div>`:''}</td><td>${esc(r.action)}</td><td class="km">${km(r.mileage)}</td><td class="money">${money(r.cost)}</td></tr>`).join('')}</tbody></table></div>`; }
+  function miniMaintTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Item</th><th>Event</th><th>Mileage</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.event_date)}</td><td><b>${esc(r.part_name||'—')}</b>${r.position?`<div class="subtle">${esc(r.position)}</div>`:''}</td><td>${esc(r.action||'—')}</td><td class="km">${hasMileage(r.mileage)?km(r.mileage):'—'}</td><td class="money">${moneyOptional(r.cost)}</td></tr>`).join('')}</tbody></table></div>`; }
   function itemSummary(pmsId){ const items=pmsItemsFor(pmsId); if(!items.length)return '<span class="subtle">No item details</span>'; return `<ul class="items-list">${items.map(i=>`<li><b>${esc(i.item_name)}</b> — ${esc(i.action)}${n(i.cost)>0?` (${money(i.cost)})`:''}</li>`).join('')}</ul>`; }
 
   function renderPms(rows){
@@ -629,7 +629,7 @@
   function renderMaintenance(rows){
     const sorted=[...rows].sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date)) || n(b.mileage)-n(a.mileage));
     $('tab-maintenance').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Parts & Repairs</h3><div class="subtle">Tire patches, replacements, battery, brakes and any other work.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openMaintenanceModal()">＋ Add Record</button></div>
-      ${sorted.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Part / Position</th><th>Action</th><th>Mileage</th><th>Cost</th><th>Shop</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>`<tr><td>${niceDate(r.event_date)}</td><td><span class="badge">${esc(r.category)}</span></td><td><b>${esc(r.part_name)}</b>${r.position?`<div class="subtle">${esc(r.position)}</div>`:''}</td><td>${esc(r.action)}</td><td class="km">${km(r.mileage)}</td><td class="money">${money(r.cost)}</td><td>${esc(r.shop||'—')}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openMaintenanceModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteMaintenance('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No parts or repair records yet.</div>`}
+      ${sorted.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Part / Position</th><th>Action</th><th>Mileage</th><th>Cost</th><th>Shop</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>`<tr><td>${niceDate(r.event_date)}</td><td><span class="badge">${esc(r.category)}</span></td><td><b>${esc(r.part_name||'—')}</b>${r.position?`<div class="subtle">${esc(r.position)}</div>`:''}</td><td>${esc(r.action||'—')}</td><td class="km">${hasMileage(r.mileage)?km(r.mileage):'—'}</td><td class="money">${moneyOptional(r.cost)}</td><td>${esc(r.shop||'—')}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openMaintenanceModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteMaintenance('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No parts or repair records yet.</div>`}
     </div>`;
   }
 
@@ -742,13 +742,36 @@
   });
 
   function openMaintenanceModal(id=null){
-    clearMsg('maintenanceMessage');$('maintenanceForm').reset();$('maintenanceId').value='';$('maintenanceDate').value=today();const v=currentVehicle();$('maintenanceMileage').value=v?.current_mileage??'';$('maintenanceModalTitle').textContent=id?'Edit Part / Repair':'Add Part / Repair';
-    if(id){const r=state.maintenance.find(x=>x.id===id);if(!r)return;$('maintenanceId').value=r.id;$('maintenanceDate').value=r.event_date;$('maintenanceMileage').value=r.mileage;$('maintenanceCategory').value=r.category;$('maintenancePart').value=r.part_name;$('maintenancePosition').value=r.position||'';$('maintenanceAction').value=r.action;$('maintenanceCost').value=r.cost??0;$('maintenanceShop').value=r.shop||'';$('maintenanceNotes').value=r.notes||'';} openModal('maintenanceModal');
+    clearMsg('maintenanceMessage');$('maintenanceForm').reset();$('maintenanceId').value='';$('maintenanceDate').value='';$('maintenanceMileage').value='';$('maintenanceCategory').value='';$('maintenanceAction').value='';$('maintenanceCost').value='';$('maintenanceModalTitle').textContent=id?'Edit Part / Repair':'Add Part / Repair';
+    if(id){const r=state.maintenance.find(x=>x.id===id);if(!r)return;$('maintenanceId').value=r.id;$('maintenanceDate').value=r.event_date||'';$('maintenanceMileage').value=r.mileage??'';$('maintenanceCategory').value=r.category||'';$('maintenancePart').value=r.part_name||'';$('maintenancePosition').value=r.position||'';$('maintenanceAction').value=r.action||'';$('maintenanceCost').value=r.cost??'';$('maintenanceShop').value=r.shop||'';$('maintenanceNotes').value=r.notes||'';} openModal('maintenanceModal');
   }
 
   $('maintenanceForm').addEventListener('submit',async e=>{
     e.preventDefault();clearMsg('maintenanceMessage');const v=currentVehicle();if(!v)return;setBusy(true);
-    try{const id=$('maintenanceId').value||crypto.randomUUID(),isEdit=!!$('maintenanceId').value;const payload={id,vehicle_id:v.id,event_date:$('maintenanceDate').value,mileage:n($('maintenanceMileage').value),category:$('maintenanceCategory').value,part_name:$('maintenancePart').value.trim(),position:$('maintenancePosition').value||null,action:$('maintenanceAction').value,cost:n($('maintenanceCost').value),shop:$('maintenanceShop').value.trim()||null,notes:$('maintenanceNotes').value.trim()||null,updated_at:new Date().toISOString()};const q=isEdit?supabaseClient.from('maintenance_records').update(payload).eq('id',id):supabaseClient.from('maintenance_records').insert(payload);const {error}=await q;if(error)throw error;await bumpMileageIfHigher(v.id,payload.mileage,payload.event_date,`Mileage from ${payload.part_name} ${payload.action}`);closeModal('maintenanceModal');toast(isEdit?'Record updated.':'Record added.');await loadAll();renderVehicle();}catch(err){console.error(err);showError('maintenanceMessage',err.message||'Could not save record.');}finally{setBusy(false)}
+    try{
+      const id=$('maintenanceId').value||crypto.randomUUID(),isEdit=!!$('maintenanceId').value;
+      const payload={
+        id,
+        vehicle_id:v.id,
+        event_date:$('maintenanceDate').value||null,
+        mileage:optionalNumber($('maintenanceMileage').value),
+        category:$('maintenanceCategory').value||null,
+        part_name:$('maintenancePart').value.trim()||null,
+        position:$('maintenancePosition').value||null,
+        action:$('maintenanceAction').value||null,
+        cost:optionalNumber($('maintenanceCost').value),
+        shop:$('maintenanceShop').value.trim()||null,
+        notes:$('maintenanceNotes').value.trim()||null,
+        updated_at:new Date().toISOString()
+      };
+      const q=isEdit?supabaseClient.from('maintenance_records').update(payload).eq('id',id):supabaseClient.from('maintenance_records').insert(payload);
+      const {error}=await q;if(error)throw error;
+      if(hasMileage(payload.mileage)){
+        const mileageNote=[payload.part_name,payload.action].filter(Boolean).join(' ');
+        await bumpMileageIfHigher(v.id,payload.mileage,payload.event_date, mileageNote?`Mileage from ${mileageNote}`:'Mileage from part / repair record');
+      }
+      closeModal('maintenanceModal');toast(isEdit?'Record updated.':'Record added.');await loadAll();renderVehicle();
+    }catch(err){console.error(err);showError('maintenanceMessage',err.message||'Could not save record.');}finally{setBusy(false)}
   });
 
   function openReminderModal(id=null){

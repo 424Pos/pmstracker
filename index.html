@@ -294,9 +294,9 @@
       <form id="pmsForm">
         <input id="pmsId" type="hidden" />
         <div class="form-grid">
-          <div class="field"><label>PMS Date *</label><input id="pmsDate" class="input" type="date" required /></div>
-          <div class="field"><label>Mileage at PMS *</label><input id="pmsMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" required /></div>
-          <div class="field"><label>Total PMS Cost *</label><input id="pmsTotal" class="input" type="number" min="0" step="0.01" inputmode="decimal" required /></div>
+          <div class="field"><label>PMS Date <span class="subtle">(optional)</span></label><input id="pmsDate" class="input" type="date" /></div>
+          <div class="field"><label>Mileage at PMS <span class="subtle">(optional)</span></label><input id="pmsMileage" class="input" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Leave blank if unknown" /></div>
+          <div class="field"><label>Total PMS Cost <span class="subtle">(optional)</span></label><input id="pmsTotal" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Leave blank if unknown" /></div>
           <div class="field"><label>Shop / Service Center</label><input id="pmsShop" class="input" list="shopList" maxlength="120" placeholder="e.g. Hyundai Service Center" /></div>
           <div class="field full"><label>Notes</label><textarea id="pmsNotes" class="input" maxlength="1000" placeholder="Anything important about this PMS..."></textarea></div>
           <div class="field full">
@@ -441,7 +441,9 @@
   const $ = id => document.getElementById(id);
   const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const n = v => Number(v || 0);
+  const optionalNumber = v => String(v ?? '').trim() === '' ? null : Number(v);
   const money = v => new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:2}).format(n(v));
+  const moneyOptional = v => v === null || v === undefined || String(v).trim() === '' ? '—' : money(v);
   const hasMileage = v => v !== null && v !== undefined && String(v).trim() !== '';
   const km = v => hasMileage(v) ? `${new Intl.NumberFormat('en-PH',{maximumFractionDigits:1}).format(Number(v))} km` : 'Not set';
   const niceDate = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}) : '—';
@@ -458,7 +460,8 @@
   function imageUrl(path){ if(!path)return ''; return supabaseClient.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl; }
   function currentVehicle(){ return state.vehicles.find(v=>v.id===state.currentVehicleId); }
   function recordsForVehicle(arr){ return arr.filter(x=>x.vehicle_id===state.currentVehicleId); }
-  function latestPms(vehicleId){ return state.pms.filter(x=>x.vehicle_id===vehicleId).sort((a,b)=>String(b.service_date).localeCompare(String(a.service_date)) || n(b.mileage)-n(a.mileage))[0] || null; }
+  function comparePms(a,b){ const ad=a.service_date||'',bd=b.service_date||''; if(ad&&bd){const d=String(bd).localeCompare(String(ad));if(d)return d;} else if(ad&&!bd)return -1; else if(!ad&&bd)return 1; const m=(hasMileage(b.mileage)?Number(b.mileage):-1)-(hasMileage(a.mileage)?Number(a.mileage):-1); if(m)return m; return String(b.created_at||'').localeCompare(String(a.created_at||'')); }
+  function latestPms(vehicleId){ return state.pms.filter(x=>x.vehicle_id===vehicleId).sort(comparePms)[0] || null; }
   function pmsItemsFor(pmsId){ return state.pmsItems.filter(x=>x.pms_id===pmsId); }
   function docUrl(path){ if(!path)return ''; return supabaseClient.storage.from(DOC_BUCKET).getPublicUrl(path).data.publicUrl; }
   function normalizeName(v){ return String(v||'').trim().toLowerCase(); }
@@ -569,7 +572,7 @@
 
   function renderOverview(v,pms,maint,hist,last,totalPms,totalMaint,reminders,issues,documents,total){
     const recentMaint=[...maint].sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date))).slice(0,5);
-    const recentPms=[...pms].sort((a,b)=>String(b.service_date).localeCompare(String(a.service_date))).slice(0,3);
+    const recentPms=[...pms].sort(comparePms).slice(0,3);
     const urgentReminders=reminders.filter(x=>!x.is_done).map(x=>({r:x,s:reminderStatus(x,v)})).filter(x=>x.s.label==='Overdue'||x.s.label==='Due Soon').slice(0,4);
     const openIssues=issues.filter(x=>x.status!=='Resolved').slice(0,4);
 
@@ -612,14 +615,14 @@
       </div>`;
   }
 
-  function miniPmsTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Mileage</th><th>Changed / Serviced</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.service_date)}</td><td class="km">${km(r.mileage)}</td><td>${itemSummary(r.id)}</td><td class="money">${money(r.total_cost)}</td></tr>`).join('')}</tbody></table></div>`; }
+  function miniPmsTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Mileage</th><th>Changed / Serviced</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.service_date)}</td><td class="km">${km(r.mileage)}</td><td>${itemSummary(r.id)}</td><td class="money">${moneyOptional(r.total_cost)}</td></tr>`).join('')}</tbody></table></div>`; }
   function miniMaintTable(rows){ return `<div class="table-wrap"><table style="min-width:650px"><thead><tr><th>Date</th><th>Item</th><th>Event</th><th>Mileage</th><th>Cost</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${niceDate(r.event_date)}</td><td><b>${esc(r.part_name)}</b>${r.position?`<div class="subtle">${esc(r.position)}</div>`:''}</td><td>${esc(r.action)}</td><td class="km">${km(r.mileage)}</td><td class="money">${money(r.cost)}</td></tr>`).join('')}</tbody></table></div>`; }
   function itemSummary(pmsId){ const items=pmsItemsFor(pmsId); if(!items.length)return '<span class="subtle">No item details</span>'; return `<ul class="items-list">${items.map(i=>`<li><b>${esc(i.item_name)}</b> — ${esc(i.action)}${n(i.cost)>0?` (${money(i.cost)})`:''}</li>`).join('')}</ul>`; }
 
   function renderPms(rows){
-    const sorted=[...rows].sort((a,b)=>String(b.service_date).localeCompare(String(a.service_date)) || n(b.mileage)-n(a.mileage));
+    const sorted=[...rows].sort(comparePms);
     $('tab-pms').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">PMS History</h3><div class="subtle">Full preventive-maintenance history for this vehicle.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openPmsModal()">＋ Add PMS</button></div>
-      ${sorted.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Mileage</th><th>Changed / Serviced</th><th>Shop</th><th>Total</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>`<tr><td>${niceDate(r.service_date)}</td><td class="km">${km(r.mileage)}</td><td>${itemSummary(r.id)}</td><td>${esc(r.shop||'—')}</td><td class="money">${money(r.total_cost)}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openPmsModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deletePms('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No PMS records yet. Add the first service to start the history.</div>`}
+      ${sorted.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Mileage</th><th>Changed / Serviced</th><th>Shop</th><th>Total</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>`<tr><td>${niceDate(r.service_date)}</td><td class="km">${km(r.mileage)}</td><td>${itemSummary(r.id)}</td><td>${esc(r.shop||'—')}</td><td class="money">${moneyOptional(r.total_cost)}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openPmsModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deletePms('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No PMS records yet. Add the first service to start the history.</div>`}
     </div>`;
   }
 
@@ -722,14 +725,14 @@
   $('addPmsItemBtn').onclick=()=>addPmsItemRow();
 
   function openPmsModal(id=null){
-    clearMsg('pmsMessage');$('pmsForm').reset();$('pmsId').value='';$('pmsItemsBox').innerHTML='';$('pmsDate').value=today(); const v=currentVehicle();$('pmsMileage').value=v?.current_mileage??'';$('pmsModalTitle').textContent=id?'Edit PMS':'Add PMS';
-    if(id){const p=state.pms.find(x=>x.id===id);if(!p)return;$('pmsId').value=p.id;$('pmsDate').value=p.service_date;$('pmsMileage').value=p.mileage;$('pmsTotal').value=p.total_cost;$('pmsShop').value=p.shop||'';$('pmsNotes').value=p.notes||'';pmsItemsFor(id).forEach(addPmsItemRow);} else addPmsItemRow(); openModal('pmsModal');
+    clearMsg('pmsMessage');$('pmsForm').reset();$('pmsId').value='';$('pmsItemsBox').innerHTML='';$('pmsDate').value='';$('pmsMileage').value='';$('pmsTotal').value='';$('pmsModalTitle').textContent=id?'Edit PMS':'Add PMS';
+    if(id){const p=state.pms.find(x=>x.id===id);if(!p)return;$('pmsId').value=p.id;$('pmsDate').value=p.service_date||'';$('pmsMileage').value=p.mileage??'';$('pmsTotal').value=p.total_cost??'';$('pmsShop').value=p.shop||'';$('pmsNotes').value=p.notes||'';pmsItemsFor(id).forEach(addPmsItemRow);} else addPmsItemRow(); openModal('pmsModal');
   }
 
   $('pmsForm').addEventListener('submit',async e=>{
     e.preventDefault();clearMsg('pmsMessage');const v=currentVehicle();if(!v)return;setBusy(true);
     try{
-      const id=$('pmsId').value||crypto.randomUUID(),isEdit=!!$('pmsId').value; const payload={id,vehicle_id:v.id,service_date:$('pmsDate').value,mileage:n($('pmsMileage').value),total_cost:n($('pmsTotal').value),shop:$('pmsShop').value.trim()||null,notes:$('pmsNotes').value.trim()||null,updated_at:new Date().toISOString()};
+      const id=$('pmsId').value||crypto.randomUUID(),isEdit=!!$('pmsId').value; const payload={id,vehicle_id:v.id,service_date:$('pmsDate').value||null,mileage:optionalNumber($('pmsMileage').value),total_cost:optionalNumber($('pmsTotal').value),shop:$('pmsShop').value.trim()||null,notes:$('pmsNotes').value.trim()||null,updated_at:new Date().toISOString()};
       const q=isEdit?supabaseClient.from('pms_records').update(payload).eq('id',id):supabaseClient.from('pms_records').insert(payload);const {error}=await q;if(error)throw error;
       if(isEdit){const {error:de}=await supabaseClient.from('pms_items').delete().eq('pms_id',id);if(de)throw de;}
       const items=[...document.querySelectorAll('#pmsItemsBox .pms-item-row')].map(r=>({pms_id:id,item_name:r.querySelector('.pms-item-name').value.trim(),action:r.querySelector('.pms-item-action').value,cost:n(r.querySelector('.pms-item-cost').value)})).filter(x=>x.item_name);
@@ -780,7 +783,7 @@
   $('mileageForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const reading=n($('mileageValue').value),date=$('mileageDate').value;const {error}=await supabaseClient.from('vehicles').update({current_mileage:reading,updated_at:new Date().toISOString()}).eq('id',v.id);if(error)throw error;await addMileageHistory(v.id,date,reading,$('mileageNotes').value.trim()||'Manual mileage update');closeModal('mileageModal');toast('Mileage updated.');await loadAll();renderVehicle();}catch(err){showError('mileageMessage',err.message||'Could not update mileage.');}finally{setBusy(false)}});
 
   async function addMileageHistory(vehicleId,date,mileage,notes){const {error}=await supabaseClient.from('mileage_history').insert({vehicle_id:vehicleId,reading_date:date,mileage,notes});if(error)throw error;}
-  async function bumpMileageIfHigher(vehicleId,mileage,date,notes){const v=state.vehicles.find(x=>x.id===vehicleId);if(v && n(mileage)>n(v.current_mileage)){const {error}=await supabaseClient.from('vehicles').update({current_mileage:mileage,updated_at:new Date().toISOString()}).eq('id',vehicleId);if(error)throw error;await addMileageHistory(vehicleId,date,mileage,notes);}}
+  async function bumpMileageIfHigher(vehicleId,mileage,date,notes){const v=state.vehicles.find(x=>x.id===vehicleId);if(!hasMileage(mileage))return;if(v && Number(mileage)>n(v.current_mileage)){const {error}=await supabaseClient.from('vehicles').update({current_mileage:mileage,updated_at:new Date().toISOString()}).eq('id',vehicleId);if(error)throw error;if(date)await addMileageHistory(vehicleId,date,mileage,notes);}}
 
   async function toggleVehicleSold(id){
     const v=state.vehicles.find(x=>x.id===id);if(!v)return;

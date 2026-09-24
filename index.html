@@ -80,6 +80,15 @@
     .feature-card{border-radius:17px;padding:14px;background:#0d0912;border:1px solid #281b34;min-width:0}
     .feature-card h4{margin:0 0 7px;font-size:.95rem}.feature-card .big{font-size:1.18rem;font-weight:950}
     .doc-link{color:#d8b4fe;font-weight:850;text-decoration:none}.doc-link:hover{text-decoration:underline}
+    .important-doc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .important-doc-card{border-radius:18px;overflow:hidden;background:#0d0912;border:1px solid #281b34;min-width:0}
+    .important-doc-preview{height:190px;background:#08060b;display:grid;place-items:center;border-bottom:1px solid #281b34;overflow:hidden}
+    .important-doc-preview img{width:100%;height:100%;object-fit:contain;display:block;background:#09070d}
+    .important-doc-preview a{width:100%;height:100%;display:grid;place-items:center;text-decoration:none;color:#d8b4fe}
+    .important-doc-file{font-size:2.4rem;text-align:center}.important-doc-file span{display:block;font-size:.8rem;margin-top:8px;font-weight:850}
+    .important-doc-body{padding:14px}.important-doc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}.important-doc-title{font-weight:950;font-size:1rem}
+    .important-doc-meta{display:grid;gap:5px;margin-top:8px}.important-doc-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .important-doc-missing{height:190px;display:grid;place-items:center;text-align:center;padding:18px;color:var(--muted)}
     .tire-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
     .tire-card{border-radius:17px;padding:14px;background:#0d0912;border:1px solid #281b34}
     .tire-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
@@ -177,7 +186,8 @@
       .quick-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
       .modal{padding:8px;align-items:end}.modal-card{max-height:94vh;border-radius:22px 22px 10px 10px;padding:14px}
       .pms-item-row{grid-template-columns:1fr 1fr}.pms-item-row .field:first-child{grid-column:1/-1}.icon-delete{width:100%}
-      .photo-picker{grid-template-columns:90px 1fr}.section-head{align-items:center}.section-head .btn{font-size:.78rem}.feature-grid,.tire-grid{grid-template-columns:1fr}
+      .photo-picker{grid-template-columns:90px 1fr}.section-head{align-items:center}.section-head .btn{font-size:.78rem}.feature-grid,.tire-grid,.important-doc-grid{grid-template-columns:1fr}
+      .important-doc-preview,.important-doc-missing{height:220px}
     }
   </style>
 </head>
@@ -461,6 +471,23 @@
     return {label:'Upcoming',cls:'status-good'};
   }
   function documentStatus(r){ if(r.never_expires)return {label:'Never Expires',cls:'status-done'}; const d=daysUntil(r.expiry_date); if(d===null)return {label:'No Expiry Date',cls:'status-done'}; if(d<0)return {label:'Expired',cls:'status-overdue'}; if(d<=30)return {label:'Expiring Soon',cls:'status-soon'}; return {label:'Valid',cls:'status-good'}; }
+  function newestDocumentOfType(documents,type){
+    const rows=documents.filter(x=>x.document_type===type);
+    return rows.length?[...rows].sort((a,b)=>{
+      const aKey=a.issue_date||a.expiry_date||a.created_at||'';
+      const bKey=b.issue_date||b.expiry_date||b.created_at||'';
+      return String(bKey).localeCompare(String(aKey));
+    })[0]:null;
+  }
+  function isImageDocument(r){ return /\.(jpe?g|png|webp)$/i.test(String(r?.attachment_name||r?.attachment_path||'')); }
+  function importantDocumentCard(r,title,subtitle){
+    if(!r){
+      return `<article class="important-doc-card"><div class="important-doc-missing"><div><div style="font-size:2.4rem;margin-bottom:8px">📄</div><b>${esc(title)}</b><div class="subtle" style="margin-top:6px">Not added yet.</div></div></div><div class="important-doc-body"><div class="subtle">${esc(subtitle)}</div><div class="important-doc-actions"><button class="btn btn-primary btn-small" type="button" onclick="showTab('documents')">＋ Add in Documents</button></div></div></article>`;
+    }
+    const st=documentStatus(r),u=docUrl(r.attachment_path),image=isImageDocument(r);
+    const preview=u?(image?`<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="${esc(title)} attachment"></a>`:`<a href="${esc(u)}" target="_blank" rel="noopener"><div class="important-doc-file">📄<span>Open attachment</span></div></a>`):`<div class="important-doc-missing"><div><div style="font-size:2.2rem;margin-bottom:8px">📎</div><div>No attachment uploaded</div></div></div>`;
+    return `<article class="important-doc-card"><div class="important-doc-preview">${preview}</div><div class="important-doc-body"><div class="important-doc-head"><div><div class="important-doc-title">${esc(title)}</div><div class="subtle">${esc(subtitle)}</div></div><span class="badge ${st.cls}">${st.label}</span></div><div class="important-doc-meta">${r.issue_date?`<div><span class="subtle">Issued:</span> <b>${niceDate(r.issue_date)}</b></div>`:''}${r.expiry_date&&!r.never_expires?`<div><span class="subtle">Expires:</span> <b>${niceDate(r.expiry_date)}</b></div>`:''}${r.never_expires?`<div><span class="subtle">Expiry:</span> <b>Never expires</b></div>`:''}${r.reference_no?`<div><span class="subtle">Reference:</span> <b>${esc(r.reference_no)}</b></div>`:''}${r.provider?`<div><span class="subtle">Provider:</span> <b>${esc(r.provider)}</b></div>`:''}</div><div class="important-doc-actions">${u?`<a class="btn btn-primary btn-small" href="${esc(u)}" target="_blank" rel="noopener">👁 View Attachment</a>`:''}<button class="btn btn-secondary btn-small" type="button" onclick="openDocumentModal('${r.id}')">Edit</button></div></div></article>`;
+  }
   function shopNameOptions(){ const shops=recordsForVehicle(state.shops); $('shopList').innerHTML=shops.map(x=>`<option value="${esc(x.name)}"></option>`).join(''); }
 
   async function loadAll(){
@@ -545,7 +572,16 @@
     const recentPms=[...pms].sort((a,b)=>String(b.service_date).localeCompare(String(a.service_date))).slice(0,3);
     const urgentReminders=reminders.filter(x=>!x.is_done).map(x=>({r:x,s:reminderStatus(x,v)})).filter(x=>x.s.label==='Overdue'||x.s.label==='Due Soon').slice(0,4);
     const openIssues=issues.filter(x=>x.status!=='Resolved').slice(0,4);
-    const expiring=documents.map(x=>({r:x,s:documentStatus(x)})).filter(x=>x.s.label==='Expired'||x.s.label==='Expiring Soon').slice(0,4);
+
+    // Official Receipt (OR) is renewed yearly. Keep all OR records in the
+    // Documents history, but only the newest OR should affect Needs Attention.
+    const orType='Official Receipt (OR)';
+    const crType='Certificate of Registration (CR)';
+    const newestOr=newestDocumentOfType(documents,orType);
+    const newestCr=newestDocumentOfType(documents,crType);
+    const otherDocs=documents.filter(x=>x.document_type!==orType);
+    const attentionDocs=newestOr?[...otherDocs,newestOr]:otherDocs;
+    const expiring=attentionDocs.map(x=>({r:x,s:documentStatus(x)})).filter(x=>x.s.label==='Expired'||x.s.label==='Expiring Soon').slice(0,4);
     $('tab-overview').innerHTML=`
       <div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Quick Summary</h3></div><div class="quick-grid">
         <div class="quick-card"><div class="q-label">PMS Records</div><div class="q-value">${pms.length}</div></div>
@@ -554,6 +590,10 @@
         <div class="quick-card"><div class="q-label">PMS Spending</div><div class="q-value money">${money(totalPms)}</div></div>
         <div class="quick-card"><div class="q-label">Repair / Parts Spending</div><div class="q-value money">${money(totalMaint)}</div></div>
         <div class="quick-card"><div class="q-label">All Recorded Spending</div><div class="q-value money">${money(total)}</div></div>
+      </div></div>
+      <div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Important Vehicle Documents</h3><div class="subtle">Your CR and latest yearly OR are always available here for quick access.</div></div><button class="btn btn-secondary btn-small" type="button" onclick="showTab('documents')">All Documents</button></div><div class="important-doc-grid">
+        ${importantDocumentCard(newestCr,'Certificate of Registration (CR)','Permanent vehicle registration')}
+        ${importantDocumentCard(newestOr,'Latest Official Receipt (OR)','Latest yearly registration receipt')}
       </div></div>
       ${(urgentReminders.length||openIssues.length||expiring.length)?`<div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Needs Attention</h3></div><div class="feature-grid">
         ${urgentReminders.map(x=>`<div class="feature-card"><span class="badge ${x.s.cls}">${x.s.label}</span><h4>🔔 ${esc(x.r.title)}</h4><div class="subtle">${x.r.due_date?`Due ${niceDate(x.r.due_date)}`:''}${x.r.due_date&&hasMileage(x.r.due_mileage)?' • ':''}${hasMileage(x.r.due_mileage)?km(x.r.due_mileage):''}</div></div>`).join('')}

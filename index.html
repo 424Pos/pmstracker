@@ -573,14 +573,18 @@
     const urgentReminders=reminders.filter(x=>!x.is_done).map(x=>({r:x,s:reminderStatus(x,v)})).filter(x=>x.s.label==='Overdue'||x.s.label==='Due Soon').slice(0,4);
     const openIssues=issues.filter(x=>x.status!=='Resolved').slice(0,4);
 
-    // Official Receipt (OR) is renewed yearly. Keep all OR records in the
-    // Documents history, but only the newest OR should affect Needs Attention.
+    // Renewable documents keep their full history in the Documents tab, but
+    // Needs Attention should only evaluate the newest record for each type.
+    // This prevents an old expired OR/Insurance/etc. from staying visible after renewal.
     const orType='Official Receipt (OR)';
     const crType='Certificate of Registration (CR)';
     const newestOr=newestDocumentOfType(documents,orType);
     const newestCr=newestDocumentOfType(documents,crType);
-    const otherDocs=documents.filter(x=>x.document_type!==orType);
-    const attentionDocs=newestOr?[...otherDocs,newestOr]:otherDocs;
+    const renewableTypes=[orType,'Insurance','Emission Test','CTPL'];
+    const attentionDocs=[
+      ...documents.filter(x=>!renewableTypes.includes(x.document_type)),
+      ...renewableTypes.map(type=>newestDocumentOfType(documents,type)).filter(Boolean)
+    ];
     const expiring=attentionDocs.map(x=>({r:x,s:documentStatus(x)})).filter(x=>x.s.label==='Expired'||x.s.label==='Expiring Soon').slice(0,4);
     $('tab-overview').innerHTML=`
       <div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Quick Summary</h3></div><div class="quick-grid">

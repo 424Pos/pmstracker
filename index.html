@@ -179,7 +179,7 @@
     }
     @media (max-width:680px){
       .app{padding:12px 10px 60px}.topbar{top:6px;padding:12px;border-radius:18px;align-items:flex-start}.brand-icon{width:40px;height:40px;border-radius:12px}.subtle.top-sub{display:none}
-      .top-actions .btn-secondary{display:none}.btn{min-height:42px;padding:0 13px}
+      #homeBtn:not(.hidden){display:inline-flex!important}.btn{min-height:42px;padding:0 13px}
       .garage-grid{grid-template-columns:1fr}.vehicle-photo{height:220px}
       .vehicle-hero{grid-template-columns:1fr;padding:12px}.hero-photo{height:220px}.hero-actions{display:grid;grid-template-columns:1fr 1fr}.hero-actions .btn:first-child{grid-column:1/-1}
       .stats-grid{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:12px}.stat-value{font-size:1rem}
@@ -543,13 +543,39 @@
     }).join('');
   }
 
-  function openVehicle(id){
+  function openVehicle(id, options={}){
     state.currentVehicleId=id; state.activeTab='overview';
     $('garageView').classList.add('hidden'); $('vehicleView').classList.remove('hidden'); $('homeBtn').classList.remove('hidden'); $('addVehicleTop').classList.add('hidden');
     document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='overview'));
+
+    // Create a browser/WebView history entry so Android's Back button/gesture
+    // returns to the Garage instead of immediately closing the APK.
+    if(!options.fromHistory){
+      history.pushState({pmsView:'vehicle',vehicleId:id},'',location.href);
+    }
+
     renderVehicle(); window.scrollTo({top:0,behavior:'smooth'});
   }
-  function backToGarage(){ state.currentVehicleId=null;$('vehicleView').classList.add('hidden');$('garageView').classList.remove('hidden');$('homeBtn').classList.add('hidden');$('addVehicleTop').classList.remove('hidden');renderGarage();window.scrollTo({top:0,behavior:'smooth'}); }
+
+  function showGarageView(){
+    state.currentVehicleId=null;
+    $('vehicleView').classList.add('hidden');
+    $('garageView').classList.remove('hidden');
+    $('homeBtn').classList.add('hidden');
+    $('addVehicleTop').classList.remove('hidden');
+    renderGarage();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function backToGarage(){
+    // When a vehicle was opened normally, step back through browser/WebView
+    // history. The popstate handler below then restores the Garage view.
+    if(history.state?.pmsView==='vehicle'){
+      history.back();
+      return;
+    }
+    showGarageView();
+  }
 
   function renderVehicle(){
     const v=currentVehicle(); if(!v){backToGarage();return}
@@ -844,6 +870,18 @@
   const deleteIssue=id=>deleteSimple('vehicle_issues',id,'issue');
   async function deleteTire(id){if(!confirm('Delete this tire and all of its patch/repair events?\n\nThis cannot be undone.'))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from('tires').delete().eq('id',id);if(error)throw error;toast('Tire deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   async function deleteDocument(id){const r=state.documents.find(x=>x.id===id);if(!r||!confirm('Delete this registration / insurance record and its attachment?\n\nThis cannot be undone.'))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from('vehicle_documents').delete().eq('id',id);if(error)throw error;if(r.attachment_path)await supabaseClient.storage.from(DOC_BUCKET).remove([r.attachment_path]);toast('Document deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
+
+  // Establish the Garage as the base history state. This is especially useful
+  // when the website is wrapped inside an Android WebView/APK.
+  if(!history.state?.pmsView){
+    history.replaceState({pmsView:'garage'},'',location.href);
+  }
+
+  window.addEventListener('popstate',()=>{
+    if(state.currentVehicleId){
+      showGarageView();
+    }
+  });
 
   $('homeBtn').onclick=backToGarage;$('addVehicleTop').onclick=()=>openVehicleModal();document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
   document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden')}));

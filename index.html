@@ -134,9 +134,12 @@
     .stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:800}
     .stat-value{font-size:1.2rem;font-weight:950;margin-top:5px;overflow-wrap:anywhere}
     .stat-violet{color:var(--lilac)} .stat-green{color:var(--green)} .stat-orange{color:var(--orange)} .stat-cyan{color:var(--cyan)}
-    .tabs{display:flex;gap:8px;overflow-x:auto;padding:8px;margin-top:16px;border-radius:16px;scrollbar-width:none}
-    .tabs::-webkit-scrollbar{display:none}
+    .tabs-shell{margin-top:16px}
+    .tabs{display:flex;flex-wrap:wrap;gap:8px;overflow:visible;padding:8px;margin:0;border-radius:16px}
     .tab{flex:0 0 auto;min-height:40px;border-radius:11px;border:1px solid transparent;background:transparent;color:#b9acc7;padding:0 14px;font-weight:850}
+    .tab-scroll-btn{display:none;width:40px;height:44px;border-radius:12px;border:1px solid #3a2850;background:#191222;color:#efe7ff;font-size:1.45rem;font-weight:950;align-items:center;justify-content:center;padding:0;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+    .tab-scroll-btn:hover{border-color:#8b5cf6;background:#241733}
+    .tab-scroll-btn:disabled{opacity:.28;cursor:default;filter:none;transform:none}
     .tab.active{background:linear-gradient(135deg,rgba(124,58,237,.55),rgba(167,139,250,.24));border-color:rgba(196,167,255,.30);color:#fff}
     .tab-panel{margin-top:14px}
     .panel{border-radius:20px;padding:16px}
@@ -209,6 +212,13 @@
       .vehicle-hero{grid-template-columns:240px 1fr}
       .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .quick-grid{grid-template-columns:1fr 1fr}
+      .tabs-shell{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:6px;align-items:center}
+      .tabs{min-width:0;width:100%;max-width:100%;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;scrollbar-width:thin;scrollbar-color:#8b5cf6 #17101f;scroll-snap-type:x proximity}
+      .tabs::-webkit-scrollbar{display:block;height:7px}
+      .tabs::-webkit-scrollbar-track{background:#17101f;border-radius:999px}
+      .tabs::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#7c3aed,#a78bfa);border-radius:999px}
+      .tab{scroll-snap-align:start}
+      .tab-scroll-btn{display:flex}
     }
     @media (max-width:680px){
       .app{padding:12px 10px 60px}.topbar{top:6px;padding:12px;border-radius:18px;align-items:flex-start}.brand-icon{width:40px;height:40px;border-radius:12px}.subtle.top-sub{display:none}
@@ -262,21 +272,25 @@
       <div id="vehicleHero" class="vehicle-hero glass"></div>
       <div id="statsGrid" class="stats-grid"></div>
 
-      <nav class="tabs glass" aria-label="Vehicle sections">
-        <button class="tab active" data-tab="overview" type="button">Overview</button>
-        <button class="tab" data-tab="pms" type="button">PMS History</button>
-        <button class="tab" data-tab="maintenance" type="button">Parts & Repairs</button>
-        <button class="tab" data-tab="reminders" type="button">🔔 Reminders</button>
-        <button class="tab" data-tab="tires" type="button">🛞 Tires</button>
-        <button class="tab" data-tab="fuel" type="button">⛽ Fuel</button>
-        <button class="tab" data-tab="expenses" type="button">💸 Expenses</button>
-        <button class="tab" data-tab="documents" type="button">📄 Registration & Insurance</button>
-        <button class="tab" data-tab="shops" type="button">🔧 Shops</button>
-        <button class="tab" data-tab="issues" type="button">⚠️ Issues</button>
-        <button class="tab" data-tab="timeline" type="button">🕒 Timeline</button>
-        <button class="tab" data-tab="gallery" type="button">📸 Gallery</button>
-        <button class="tab" data-tab="mileage" type="button">Mileage History</button>
-      </nav>
+      <div class="tabs-shell">
+        <button id="tabsLeftBtn" class="tab-scroll-btn" type="button" aria-label="Scroll vehicle tabs left" onclick="scrollVehicleTabs(-1)">‹</button>
+        <nav id="vehicleTabs" class="tabs glass" aria-label="Vehicle sections">
+          <button class="tab active" data-tab="overview" type="button">Overview</button>
+          <button class="tab" data-tab="pms" type="button">PMS History</button>
+          <button class="tab" data-tab="maintenance" type="button">Parts & Repairs</button>
+          <button class="tab" data-tab="reminders" type="button">🔔 Reminders</button>
+          <button class="tab" data-tab="tires" type="button">🛞 Tires</button>
+          <button class="tab" data-tab="fuel" type="button">⛽ Fuel</button>
+          <button class="tab" data-tab="expenses" type="button">💸 Expenses</button>
+          <button class="tab" data-tab="documents" type="button">📄 Registration & Insurance</button>
+          <button class="tab" data-tab="shops" type="button">🔧 Shops</button>
+          <button class="tab" data-tab="issues" type="button">⚠️ Issues</button>
+          <button class="tab" data-tab="timeline" type="button">🕒 Timeline</button>
+          <button class="tab" data-tab="gallery" type="button">📸 Gallery</button>
+          <button class="tab" data-tab="mileage" type="button">Mileage History</button>
+        </nav>
+        <button id="tabsRightBtn" class="tab-scroll-btn" type="button" aria-label="Scroll vehicle tabs right" onclick="scrollVehicleTabs(1)">›</button>
+      </div>
 
       <div id="tab-overview" class="tab-panel"></div>
       <div id="tab-pms" class="tab-panel hidden"></div>
@@ -876,7 +890,31 @@
     </div>`;
   }
 
-  function showTab(name){ state.activeTab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name)); ['overview','pms','maintenance','reminders','tires','fuel','expenses','documents','shops','issues','timeline','gallery','mileage'].forEach(x=>$(`tab-${x}`).classList.toggle('hidden',x!==name)); }
+  function updateTabScrollButtons(){
+    const tabs=$('vehicleTabs'),left=$('tabsLeftBtn'),right=$('tabsRightBtn');
+    if(!tabs||!left||!right)return;
+    const max=Math.max(0,tabs.scrollWidth-tabs.clientWidth);
+    left.disabled=tabs.scrollLeft<=4;
+    right.disabled=tabs.scrollLeft>=max-4;
+  }
+
+  function scrollVehicleTabs(direction){
+    const tabs=$('vehicleTabs');
+    if(!tabs)return;
+    const amount=Math.max(240,Math.round(tabs.clientWidth*.72));
+    tabs.scrollBy({left:direction*amount,behavior:'smooth'});
+    setTimeout(updateTabScrollButtons,280);
+  }
+  window.scrollVehicleTabs=scrollVehicleTabs;
+
+  function showTab(name){
+    state.activeTab=name;
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+    ['overview','pms','maintenance','reminders','tires','fuel','expenses','documents','shops','issues','timeline','gallery','mileage'].forEach(x=>$(`tab-${x}`).classList.toggle('hidden',x!==name));
+    const active=document.querySelector(`.tab[data-tab="${name}"]`);
+    if(active&&window.innerWidth<=980)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    setTimeout(updateTabScrollButtons,120);
+  }
 
   function openVehicleModal(id=null){
     clearMsg('vehicleMessage'); $('vehicleForm').reset(); $('vehicleId').value='';$('existingImagePath').value='';$('photoPreview').innerHTML='📷';$('vehicleModalTitle').textContent=id?'Edit Vehicle':'Add Vehicle';
@@ -1093,6 +1131,18 @@
   });
 
   $('homeBtn').onclick=backToGarage;$('addVehicleTop').onclick=()=>openVehicleModal();document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
+  const vehicleTabs=$('vehicleTabs');
+  if(vehicleTabs){
+    vehicleTabs.addEventListener('scroll',updateTabScrollButtons,{passive:true});
+    vehicleTabs.addEventListener('wheel',e=>{
+      if(window.innerWidth<=980&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){
+        e.preventDefault();
+        vehicleTabs.scrollLeft+=e.deltaY;
+      }
+    },{passive:false});
+  }
+  window.addEventListener('resize',updateTabScrollButtons);
+  updateTabScrollButtons();
   document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hidden')}));
   document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'))});
 

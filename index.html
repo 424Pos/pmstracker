@@ -90,7 +90,23 @@
     .important-doc-meta{display:grid;gap:5px;margin-top:8px}.important-doc-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
     .important-doc-missing{height:190px;display:grid;place-items:center;text-align:center;padding:18px;color:var(--muted)}
     .tire-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .tire-card{border-radius:17px;padding:14px;background:#0d0912;border:1px solid #281b34}
+    .tire-card{border-radius:17px;padding:14px;background:#0d0912;border:1px solid #281b34;transition:.18s ease;box-shadow:inset 4px 0 0 transparent}
+    .tire-card.pos-front-left{border-color:rgba(139,92,246,.42);box-shadow:inset 4px 0 0 #8b5cf6,0 0 22px rgba(139,92,246,.08)}
+    .tire-card.pos-front-right{border-color:rgba(236,72,153,.42);box-shadow:inset 4px 0 0 #ec4899,0 0 22px rgba(236,72,153,.08)}
+    .tire-card.pos-rear-left{border-color:rgba(20,184,166,.42);box-shadow:inset 4px 0 0 #14b8a6,0 0 22px rgba(20,184,166,.08)}
+    .tire-card.pos-rear-right{border-color:rgba(245,158,11,.42);box-shadow:inset 4px 0 0 #f59e0b,0 0 22px rgba(245,158,11,.08)}
+    .tire-card.pos-front{border-color:rgba(59,130,246,.42);box-shadow:inset 4px 0 0 #3b82f6,0 0 22px rgba(59,130,246,.08)}
+    .tire-card.pos-rear{border-color:rgba(34,197,94,.42);box-shadow:inset 4px 0 0 #22c55e,0 0 22px rgba(34,197,94,.08)}
+    .tire-card.pos-spare{border-color:rgba(234,179,8,.42);box-shadow:inset 4px 0 0 #eab308,0 0 22px rgba(234,179,8,.08)}
+    .tire-position-badge{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:7px 13px;border-radius:12px;font-size:.88rem;font-weight:950;letter-spacing:.01em;border:1px solid rgba(196,167,255,.24);background:#191222;color:#f8f5ff;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+    .tire-position-badge.pos-front-left{background:linear-gradient(135deg,rgba(124,58,237,.58),rgba(59,130,246,.28));border-color:#8b5cf6;color:#f5f3ff;box-shadow:0 0 18px rgba(139,92,246,.22)}
+    .tire-position-badge.pos-front-right{background:linear-gradient(135deg,rgba(219,39,119,.52),rgba(168,85,247,.30));border-color:#ec4899;color:#fff1f8;box-shadow:0 0 18px rgba(236,72,153,.20)}
+    .tire-position-badge.pos-rear-left{background:linear-gradient(135deg,rgba(13,148,136,.50),rgba(34,197,94,.23));border-color:#14b8a6;color:#ecfeff;box-shadow:0 0 18px rgba(20,184,166,.18)}
+    .tire-position-badge.pos-rear-right{background:linear-gradient(135deg,rgba(217,119,6,.52),rgba(244,63,94,.20));border-color:#f59e0b;color:#fff7ed;box-shadow:0 0 18px rgba(245,158,11,.18)}
+    .tire-position-badge.pos-front{background:linear-gradient(135deg,rgba(37,99,235,.52),rgba(139,92,246,.24));border-color:#3b82f6;color:#eff6ff}
+    .tire-position-badge.pos-rear{background:linear-gradient(135deg,rgba(22,163,74,.48),rgba(20,184,166,.22));border-color:#22c55e;color:#f0fdf4}
+    .tire-position-badge.pos-spare{background:linear-gradient(135deg,rgba(202,138,4,.50),rgba(245,158,11,.23));border-color:#eab308;color:#fefce8}
+    .tire-position-badge.pos-other{background:linear-gradient(135deg,rgba(109,40,217,.42),rgba(100,116,139,.24));border-color:#7c3aed;color:#f5f3ff}
     .tire-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
     .breakdown-bar{height:9px;background:#21162b;border-radius:999px;overflow:hidden;margin-top:7px}.breakdown-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#c4a7ff);border-radius:999px}
     .vehicle-body{padding:16px}
@@ -131,6 +147,23 @@
     .quick-card{border-radius:16px;padding:14px;background:#0d0912;border:1px solid #281b34}
     .quick-card .q-label{color:var(--muted);font-size:.74rem;text-transform:uppercase;font-weight:800;letter-spacing:.06em}
     .quick-card .q-value{font-size:1rem;font-weight:900;margin-top:4px}
+    .auto-reminder-box{margin-top:4px;padding:12px;border:1px solid #3a2850;border-radius:15px;background:#0d0912}
+    .check-row{display:flex;align-items:center;gap:10px;cursor:pointer;color:#e1d5ee;font-weight:850}
+    .check-row input{width:19px;height:19px;accent-color:var(--violet)}
+    .gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .gallery-card{border-radius:17px;overflow:hidden;background:#0d0912;border:1px solid #281b34}
+    .gallery-image{height:210px;background:#08060b;display:grid;place-items:center;overflow:hidden}
+    .gallery-image img{width:100%;height:100%;object-fit:cover;display:block}
+    .gallery-body{padding:11px}.gallery-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+    .gallery-selection{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+    .gallery-selection img{width:100%;height:85px;object-fit:cover;border-radius:10px;border:1px solid #322142}
+    .timeline{position:relative;display:grid;gap:10px}
+    .timeline::before{content:"";position:absolute;left:19px;top:12px;bottom:12px;width:2px;background:#342044}
+    .timeline-item{position:relative;display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:start}
+    .timeline-dot{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#191222;border:1px solid #4a315e;z-index:1;font-size:18px}
+    .timeline-card{border-radius:15px;padding:12px;background:#0d0912;border:1px solid #281b34}
+    .timeline-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.timeline-title{font-weight:950}.timeline-date{font-size:.76rem;color:var(--muted);white-space:nowrap}
+    .fuel-number{font-variant-numeric:tabular-nums}
 
     /* tables */
     .table-wrap{overflow:auto;border:1px solid #2a1d36;border-radius:16px}
@@ -187,7 +220,8 @@
       .modal{padding:8px;align-items:end}.modal-card{max-height:94vh;border-radius:22px 22px 10px 10px;padding:14px}
       .pms-item-row{grid-template-columns:1fr 1fr}.pms-item-row .field:first-child{grid-column:1/-1}.icon-delete{width:100%}
       .photo-picker{grid-template-columns:90px 1fr}.section-head{align-items:center}.section-head .btn{font-size:.78rem}.feature-grid,.tire-grid,.important-doc-grid{grid-template-columns:1fr}
-      .important-doc-preview,.important-doc-missing{height:220px}
+      .important-doc-preview,.important-doc-missing{height:220px}.gallery-grid{grid-template-columns:1fr 1fr}.gallery-image{height:165px}.gallery-selection{grid-template-columns:1fr 1fr}
+      .timeline-head{display:block}.timeline-date{margin-top:4px}
     }
   </style>
 </head>
@@ -234,10 +268,13 @@
         <button class="tab" data-tab="maintenance" type="button">Parts & Repairs</button>
         <button class="tab" data-tab="reminders" type="button">🔔 Reminders</button>
         <button class="tab" data-tab="tires" type="button">🛞 Tires</button>
+        <button class="tab" data-tab="fuel" type="button">⛽ Fuel</button>
         <button class="tab" data-tab="expenses" type="button">💸 Expenses</button>
         <button class="tab" data-tab="documents" type="button">📄 Registration & Insurance</button>
         <button class="tab" data-tab="shops" type="button">🔧 Shops</button>
         <button class="tab" data-tab="issues" type="button">⚠️ Issues</button>
+        <button class="tab" data-tab="timeline" type="button">🕒 Timeline</button>
+        <button class="tab" data-tab="gallery" type="button">📸 Gallery</button>
         <button class="tab" data-tab="mileage" type="button">Mileage History</button>
       </nav>
 
@@ -246,10 +283,13 @@
       <div id="tab-maintenance" class="tab-panel hidden"></div>
       <div id="tab-reminders" class="tab-panel hidden"></div>
       <div id="tab-tires" class="tab-panel hidden"></div>
+      <div id="tab-fuel" class="tab-panel hidden"></div>
       <div id="tab-expenses" class="tab-panel hidden"></div>
       <div id="tab-documents" class="tab-panel hidden"></div>
       <div id="tab-shops" class="tab-panel hidden"></div>
       <div id="tab-issues" class="tab-panel hidden"></div>
+      <div id="tab-timeline" class="tab-panel hidden"></div>
+      <div id="tab-gallery" class="tab-panel hidden"></div>
       <div id="tab-mileage" class="tab-panel hidden"></div>
     </section>
   </main>
@@ -273,6 +313,7 @@
             </div>
           </div>
           <div class="field"><label>Vehicle Name / Nickname *</label><input id="nickname" class="input" maxlength="80" placeholder="e.g. Creta" required /></div>
+          <div class="field"><label>Owner's Name</label><input id="ownerName" class="input" maxlength="120" placeholder="e.g. Leif / Mom / Dad" /></div>
           <div class="field"><label>Vehicle Type *</label><select id="vehicleType" class="input" required><option value="Car">Car</option><option value="Motorcycle">Motorcycle</option><option value="SUV">SUV</option><option value="Pickup">Pickup</option><option value="Van">Van</option><option value="Truck">Truck</option><option value="Scooter">Scooter</option><option value="Other">Other</option></select></div>
           <div class="field"><label>Brand *</label><input id="brand" class="input" maxlength="80" placeholder="Hyundai" required /></div>
           <div class="field"><label>Model *</label><input id="model" class="input" maxlength="80" placeholder="Creta" required /></div>
@@ -299,6 +340,15 @@
           <div class="field"><label>Total PMS Cost <span class="subtle">(optional)</span></label><input id="pmsTotal" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Leave blank if unknown" /></div>
           <div class="field"><label>Shop / Service Center</label><input id="pmsShop" class="input" list="shopList" maxlength="120" placeholder="e.g. Hyundai Service Center" /></div>
           <div class="field full"><label>Notes</label><textarea id="pmsNotes" class="input" maxlength="1000" placeholder="Anything important about this PMS..."></textarea></div>
+          <div class="field full auto-reminder-box">
+            <label class="check-row"><input id="pmsAutoReminder" type="checkbox"> Automatically create the next PMS reminder</label>
+            <div id="pmsAutoReminderFields" class="form-grid hidden" style="margin-top:12px">
+              <div class="field"><label>After how many km?</label><input id="pmsNextKm" class="input" type="number" min="0" step="1" placeholder="e.g. 5000"></div>
+              <div class="field"><label>After how many months?</label><input id="pmsNextMonths" class="input" type="number" min="0" step="1" placeholder="e.g. 6"></div>
+              <div class="field full"><label>Reminder Name</label><input id="pmsReminderTitle" class="input" maxlength="120" value="Next PMS" placeholder="Next PMS"></div>
+            </div>
+            <div class="subtle" style="margin-top:8px">Use mileage, months, or both. A reminder is calculated from the PMS information you enter.</div>
+          </div>
           <div class="field full">
             <div class="panel-title-row" style="margin-bottom:8px"><label style="font-size:.86rem">What was changed / serviced?</label><button id="addPmsItemBtn" class="btn btn-secondary btn-small" type="button">＋ Add Item</button></div>
             <div id="pmsItemsBox" class="pms-items"></div>
@@ -329,6 +379,44 @@
         </div>
         <div id="maintenanceMessage" class="message"></div>
         <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('maintenanceModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Record</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Fuel Log modal -->
+  <div id="fuelModal" class="modal hidden">
+    <div class="modal-card glass">
+      <div class="modal-head"><h2 id="fuelModalTitle" class="modal-title">Add Fuel Log</h2><button class="close-btn" type="button" onclick="closeModal('fuelModal')">×</button></div>
+      <form id="fuelForm">
+        <input id="fuelId" type="hidden">
+        <div class="form-grid">
+          <div class="field"><label>Date <span class="subtle">(optional)</span></label><input id="fuelDate" class="input" type="date"></div>
+          <div class="field"><label>Odometer <span class="subtle">(optional)</span></label><input id="fuelOdometer" class="input" type="number" min="0" step="0.1" inputmode="decimal" placeholder="Leave blank if unknown"></div>
+          <div class="field"><label>Liters</label><input id="fuelLiters" class="input" type="number" min="0" step="0.001" inputmode="decimal" placeholder="e.g. 35.5"></div>
+          <div class="field"><label>Price / Liter</label><input id="fuelPrice" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 61.25"></div>
+          <div class="field"><label>Total Paid</label><input id="fuelTotal" class="input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Optional"></div>
+          <div class="field"><label>Fuel Type</label><select id="fuelType" class="input"><option value="">Not set</option><option>Gasoline</option><option>Diesel</option><option>Premium Gasoline</option><option>Unleaded Gasoline</option><option>E10</option><option>Other</option></select></div>
+          <div class="field full"><label>Gas Station / Location</label><input id="fuelStation" class="input" maxlength="160" placeholder="Optional"></div>
+          <div class="field full"><label class="check-row"><input id="fuelFullTank" type="checkbox"> Full tank / filled to full</label><div class="subtle">Fuel economy is calculated between full-tank records and includes partial fills in between.</div></div>
+          <div class="field full"><label>Notes</label><textarea id="fuelNotes" class="input" maxlength="1000" placeholder="Optional"></textarea></div>
+        </div>
+        <div id="fuelMessage" class="message"></div>
+        <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('fuelModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Fuel Log</button></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Vehicle Photo Gallery modal -->
+  <div id="galleryModal" class="modal hidden">
+    <div class="modal-card glass">
+      <div class="modal-head"><h2 class="modal-title">Add Vehicle Photos</h2><button class="close-btn" type="button" onclick="closeModal('galleryModal')">×</button></div>
+      <form id="galleryForm">
+        <div class="form-grid">
+          <div class="field full"><label>Photos</label><input id="galleryFiles" class="input" type="file" multiple accept="image/jpeg,image/png,image/webp"><div class="subtle">Select multiple photos at once. Images are compressed before upload.</div><div id="gallerySelection" class="gallery-selection"></div></div>
+          <div class="field full"><label>Caption / Note</label><input id="galleryCaption" class="input" maxlength="180" placeholder="Optional caption applied to these uploads"></div>
+        </div>
+        <div id="galleryMessage" class="message"></div>
+        <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('galleryModal')">Cancel</button><button class="btn btn-primary" type="submit">Upload Photos</button></div>
       </form>
     </div>
   </div>
@@ -437,7 +525,7 @@
   const IMAGE_BUCKET = "vehicle-images";
   const DOC_BUCKET = "vehicle-documents";
 
-  const state = { vehicles:[], pms:[], pmsItems:[], maintenance:[], mileage:[], reminders:[], tires:[], tireEvents:[], expenses:[], documents:[], shops:[], issues:[], currentVehicleId:null, activeTab:"overview" };
+  const state = { vehicles:[], pms:[], pmsItems:[], maintenance:[], mileage:[], reminders:[], tires:[], tireEvents:[], fuelLogs:[], photos:[], expenses:[], documents:[], shops:[], issues:[], currentVehicleId:null, activeTab:"overview" };
   const $ = id => document.getElementById(id);
   const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const n = v => Number(v || 0);
@@ -448,6 +536,15 @@
   const km = v => hasMileage(v) ? `${new Intl.NumberFormat('en-PH',{maximumFractionDigits:1}).format(Number(v))} km` : 'Not set';
   const niceDate = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}) : '—';
   const today = () => new Date().toISOString().slice(0,10);
+  const fmtNumber = (v,d=1) => v===null||v===undefined||String(v).trim()===''?'—':new Intl.NumberFormat('en-PH',{maximumFractionDigits:d}).format(Number(v));
+
+  function addMonthsToDate(dateStr,months){
+    if(!dateStr || !months)return null;
+    const d=new Date(dateStr+'T00:00:00');
+    const day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+Number(months));
+    const last=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(day,last));
+    return d.toISOString().slice(0,10);
+  }
 
   function setBusy(on,text='Saving…'){ $('loading').textContent=text; $('loading').classList.toggle('hidden',!on); }
   function toast(msg){ const t=$('toast'); t.textContent=msg;t.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.add('hidden'),2600); }
@@ -466,6 +563,23 @@
   function docUrl(path){ if(!path)return ''; return supabaseClient.storage.from(DOC_BUCKET).getPublicUrl(path).data.publicUrl; }
   function normalizeName(v){ return String(v||'').trim().toLowerCase(); }
   function daysUntil(date){ if(!date)return null; const a=new Date(today()+'T00:00:00'),b=new Date(date+'T00:00:00'); return Math.ceil((b-a)/86400000); }
+  function fuelEconomyData(logs){
+    const sorted=[...logs].sort((a,b)=>{const ak=a.fuel_date||String(a.created_at||'').slice(0,10),bk=b.fuel_date||String(b.created_at||'').slice(0,10);return String(ak).localeCompare(String(bk))||String(a.created_at||'').localeCompare(String(b.created_at||''));});
+    const byId={},segments=[]; let prevFull=-1;
+    for(let i=0;i<sorted.length;i++){
+      const cur=sorted[i];
+      if(!cur.full_tank || !hasMileage(cur.odometer))continue;
+      if(prevFull>=0){
+        const prev=sorted[prevFull],distance=Number(cur.odometer)-Number(prev.odometer);
+        const liters=sorted.slice(prevFull+1,i+1).reduce((sum,x)=>sum+n(x.liters),0);
+        if(distance>0&&liters>0){const kpl=distance/liters;byId[cur.id]={kpl,distance,liters};segments.push({kpl,distance,liters});}
+      }
+      prevFull=i;
+    }
+    const totalDistance=segments.reduce((s,x)=>s+x.distance,0),totalLiters=segments.reduce((s,x)=>s+x.liters,0);
+    return {byId,average:totalLiters>0?totalDistance/totalLiters:null,totalDistance,totalLiters};
+  }
+
   function reminderStatus(r,v){
     if(r.is_done)return {label:'Done',cls:'status-done'};
     const d=daysUntil(r.due_date), hasKm=hasMileage(v?.current_mileage)&&hasMileage(r.due_mileage), left=hasKm?Number(r.due_mileage)-Number(v.current_mileage):null;
@@ -493,10 +607,16 @@
   }
   function shopNameOptions(){ const shops=recordsForVehicle(state.shops); $('shopList').innerHTML=shops.map(x=>`<option value="${esc(x.name)}"></option>`).join(''); }
 
+  async function optionalSelect(table,orderCol,ascending=false){
+    const r=await supabaseClient.from(table).select('*').order(orderCol,{ascending});
+    if(r.error){console.warn(`Optional table ${table} is not ready yet. Run the latest SQL migration.`,r.error);return {data:[],error:null};}
+    return r;
+  }
+
   async function loadAll(){
     setBusy(true,'Loading…');
     try{
-      const [vr,pr,ir,mr,hr,rr,tr,ter,er,dr,sr,xr]=await Promise.all([
+      const [vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,dr,sr,xr]=await Promise.all([
         supabaseClient.from('vehicles').select('*').order('created_at',{ascending:true}),
         supabaseClient.from('pms_records').select('*').order('service_date',{ascending:false}),
         supabaseClient.from('pms_items').select('*').order('created_at',{ascending:true}),
@@ -505,14 +625,16 @@
         supabaseClient.from('maintenance_reminders').select('*').order('created_at',{ascending:false}),
         supabaseClient.from('tires').select('*').order('created_at',{ascending:false}),
         supabaseClient.from('tire_events').select('*').order('event_date',{ascending:false}),
+        optionalSelect('fuel_logs','created_at',false),
+        optionalSelect('vehicle_photos','created_at',false),
         supabaseClient.from('misc_expenses').select('*').order('expense_date',{ascending:false}),
         supabaseClient.from('vehicle_documents').select('*').order('created_at',{ascending:false}),
         supabaseClient.from('vehicle_shops').select('*').order('name',{ascending:true}),
         supabaseClient.from('vehicle_issues').select('*').order('reported_date',{ascending:false})
       ]);
-      const all=[vr,pr,ir,mr,hr,rr,tr,ter,er,dr,sr,xr], bad=all.find(x=>x.error); if(bad)throw bad.error;
+      const all=[vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,dr,sr,xr], bad=all.find(x=>x.error); if(bad)throw bad.error;
       state.vehicles=vr.data||[]; state.pms=pr.data||[]; state.pmsItems=ir.data||[]; state.maintenance=mr.data||[]; state.mileage=hr.data||[];
-      state.reminders=rr.data||[]; state.tires=tr.data||[]; state.tireEvents=ter.data||[]; state.expenses=er.data||[]; state.documents=dr.data||[]; state.shops=sr.data||[]; state.issues=xr.data||[];
+      state.reminders=rr.data||[]; state.tires=tr.data||[]; state.tireEvents=ter.data||[]; state.fuelLogs=fr.data||[]; state.photos=phr.data||[]; state.expenses=er.data||[]; state.documents=dr.data||[]; state.shops=sr.data||[]; state.issues=xr.data||[];
       renderGarage(); if(state.currentVehicleId && state.vehicles.some(v=>v.id===state.currentVehicleId)) renderVehicle();
     }catch(e){ console.error(e); toast('Database needs the latest SQL update. Run feature_update.sql in Supabase.'); }
     finally{setBusy(false)}
@@ -532,6 +654,7 @@
         <div class="vehicle-body">
           <div class="vehicle-name">${esc(v.nickname)}</div>
           <div class="vehicle-model">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div>
+          ${v.owner_name?`<div class="subtle" style="margin-top:3px">👤 Owner: ${esc(v.owner_name)}</div>`:''}
           <div class="subtle">${esc(v.color||'Color not set')}${v.plate_number?` • ${esc(v.plate_number)}`:''}</div>
           <div class="meta-grid">
             <div class="meta-box"><div class="meta-label">Mileage</div><div class="meta-value mileage-value">${km(v.current_mileage)}</div></div>
@@ -579,10 +702,10 @@
 
   function renderVehicle(){
     const v=currentVehicle(); if(!v){backToGarage();return}
-    const pms=recordsForVehicle(state.pms), maint=recordsForVehicle(state.maintenance), hist=recordsForVehicle(state.mileage), reminders=recordsForVehicle(state.reminders), tires=recordsForVehicle(state.tires), tireEvents=recordsForVehicle(state.tireEvents), expenses=recordsForVehicle(state.expenses), documents=recordsForVehicle(state.documents), shops=recordsForVehicle(state.shops), issues=recordsForVehicle(state.issues);
-    const last=latestPms(v.id), url=imageUrl(v.image_path), totalPms=pms.reduce((s,x)=>s+n(x.total_cost),0), totalMaint=maint.reduce((s,x)=>s+n(x.cost),0), totalMisc=expenses.reduce((s,x)=>s+n(x.cost),0), totalDocs=documents.reduce((s,x)=>s+n(x.cost),0), totalTires=tires.reduce((s,x)=>s+n(x.cost),0)+tireEvents.reduce((s,x)=>s+n(x.cost),0), total=totalPms+totalMaint+totalMisc+totalDocs+totalTires;
+    const pms=recordsForVehicle(state.pms), maint=recordsForVehicle(state.maintenance), hist=recordsForVehicle(state.mileage), reminders=recordsForVehicle(state.reminders), tires=recordsForVehicle(state.tires), tireEvents=recordsForVehicle(state.tireEvents), fuelLogs=recordsForVehicle(state.fuelLogs), photos=recordsForVehicle(state.photos), expenses=recordsForVehicle(state.expenses), documents=recordsForVehicle(state.documents), shops=recordsForVehicle(state.shops), issues=recordsForVehicle(state.issues);
+    const last=latestPms(v.id), url=imageUrl(v.image_path), totalPms=pms.reduce((s,x)=>s+n(x.total_cost),0), totalMaint=maint.reduce((s,x)=>s+n(x.cost),0), totalFuel=fuelLogs.reduce((s,x)=>s+n(x.total_cost),0), totalMisc=expenses.reduce((s,x)=>s+n(x.cost),0), totalDocs=documents.reduce((s,x)=>s+n(x.cost),0), totalTires=tires.reduce((s,x)=>s+n(x.cost),0)+tireEvents.reduce((s,x)=>s+n(x.cost),0), total=totalPms+totalMaint+totalFuel+totalMisc+totalDocs+totalTires;
     $('vehicleHero').innerHTML=`<div class="hero-photo">${url?`<img src="${esc(url)}" alt="${esc(v.nickname)}">`:`<div class="vehicle-placeholder">${vehicleEmoji(v.vehicle_type)}</div>`}</div>
-      <div class="hero-main"><div><h1 class="hero-name">${esc(v.nickname)}</h1><div style="font-size:1.05rem;font-weight:850">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div><div class="hero-tags"><span class="badge">${esc(v.vehicle_type)}</span>${v.color?`<span class="badge">🎨 ${esc(v.color)}</span>`:''}${v.plate_number?`<span class="badge">${esc(v.plate_number)}</span>`:''}${v.is_sold?`<span class="badge sold-hero-badge">🏷️ SOLD</span>`:''}</div></div>
+      <div class="hero-main"><div><h1 class="hero-name">${esc(v.nickname)}</h1><div style="font-size:1.05rem;font-weight:850">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div><div class="hero-tags"><span class="badge">${esc(v.vehicle_type)}</span>${v.owner_name?`<span class="badge">👤 ${esc(v.owner_name)}</span>`:''}${v.color?`<span class="badge">🎨 ${esc(v.color)}</span>`:''}${v.plate_number?`<span class="badge">${esc(v.plate_number)}</span>`:''}${v.is_sold?`<span class="badge sold-hero-badge">🏷️ SOLD</span>`:''}</div></div>
       <div class="hero-actions"><button class="btn btn-primary" type="button" onclick="openMileageModal()">＋ Update Mileage</button><button class="btn btn-secondary" type="button" onclick="openVehicleModal('${v.id}')">Edit Vehicle</button><button class="btn ${v.is_sold?'btn-success':'btn-danger'}" type="button" onclick="toggleVehicleSold('${v.id}')">${v.is_sold?'↩ Mark as Active Again':'🏷️ Mark as SOLD'}</button><button class="btn btn-danger" type="button" onclick="deleteVehicle('${v.id}')">Delete Vehicle</button></div></div>`;
     const openIssues=issues.filter(x=>x.status!=='Resolved').length, activeReminders=reminders.filter(x=>!x.is_done).length;
     $('statsGrid').innerHTML=`
@@ -591,16 +714,17 @@
       <div class="stat glass"><div class="stat-label">Active Reminders / Issues</div><div class="stat-value stat-cyan">${activeReminders} / ${openIssues}</div></div>
       <div class="stat glass"><div class="stat-label">Total Recorded Spend</div><div class="stat-value stat-orange">${money(total)}</div></div>`;
     shopNameOptions();
-    renderOverview(v,pms,maint,hist,last,totalPms,totalMaint,reminders,issues,documents,total);
-    renderPms(pms); renderMaintenance(maint); renderReminders(reminders,v); renderTires(tires,tireEvents,v); renderExpenses(pms,maint,expenses,documents,tires,tireEvents); renderDocuments(documents); renderShops(shops,pms,maint,expenses); renderIssues(issues,v); renderMileage(hist);
+    renderOverview(v,pms,maint,hist,last,totalPms,totalMaint,reminders,issues,documents,total,fuelLogs,photos);
+    renderPms(pms); renderMaintenance(maint); renderReminders(reminders,v); renderTires(tires,tireEvents,v); renderFuel(fuelLogs,v); renderExpenses(pms,maint,expenses,documents,tires,tireEvents,fuelLogs); renderDocuments(documents); renderShops(shops,pms,maint,expenses); renderIssues(issues,v); renderTimeline(v,pms,maint,hist,reminders,tires,tireEvents,fuelLogs,expenses,documents,issues,photos); renderGallery(photos,v); renderMileage(hist);
     showTab(state.activeTab);
   }
 
-  function renderOverview(v,pms,maint,hist,last,totalPms,totalMaint,reminders,issues,documents,total){
+  function renderOverview(v,pms,maint,hist,last,totalPms,totalMaint,reminders,issues,documents,total,fuelLogs,photos){
     const recentMaint=[...maint].sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date))).slice(0,5);
     const recentPms=[...pms].sort(comparePms).slice(0,3);
     const urgentReminders=reminders.filter(x=>!x.is_done).map(x=>({r:x,s:reminderStatus(x,v)})).filter(x=>x.s.label==='Overdue'||x.s.label==='Due Soon').slice(0,4);
     const openIssues=issues.filter(x=>x.status!=='Resolved').slice(0,4);
+    const fuelStats=fuelEconomyData(fuelLogs);
 
     // Renewable documents keep their full history in the Documents tab, but
     // Needs Attention should only evaluate the newest record for each type.
@@ -620,6 +744,9 @@
         <div class="quick-card"><div class="q-label">PMS Records</div><div class="q-value">${pms.length}</div></div>
         <div class="quick-card"><div class="q-label">Parts / Repair Records</div><div class="q-value">${maint.length}</div></div>
         <div class="quick-card"><div class="q-label">Mileage Updates</div><div class="q-value">${hist.length}</div></div>
+        <div class="quick-card"><div class="q-label">Fuel Logs</div><div class="q-value">${fuelLogs.length}</div></div>
+        <div class="quick-card"><div class="q-label">Avg Fuel Economy</div><div class="q-value">${fuelStats.average?`${fuelStats.average.toFixed(2)} km/L`:'—'}</div></div>
+        <div class="quick-card"><div class="q-label">Gallery Photos</div><div class="q-value">${photos.length}</div></div>
         <div class="quick-card"><div class="q-label">PMS Spending</div><div class="q-value money">${money(totalPms)}</div></div>
         <div class="quick-card"><div class="q-label">Repair / Parts Spending</div><div class="q-value money">${money(totalMaint)}</div></div>
         <div class="quick-card"><div class="q-label">All Recorded Spending</div><div class="q-value money">${money(total)}</div></div>
@@ -667,22 +794,65 @@
   }
 
   function tireLabel(t){return `${t.position}${t.brand?` • ${t.brand}`:''}${t.model?` ${t.model}`:''}`}
+  function tirePositionClass(position){
+    const p=String(position||'').trim().toLowerCase();
+    if(p==='front left')return 'pos-front-left';
+    if(p==='front right')return 'pos-front-right';
+    if(p==='rear left')return 'pos-rear-left';
+    if(p==='rear right')return 'pos-rear-right';
+    if(p==='front')return 'pos-front';
+    if(p==='rear')return 'pos-rear';
+    if(p==='spare')return 'pos-spare';
+    return 'pos-other';
+  }
   function renderTires(tires,events,v){
     const sorted=[...tires].sort((a,b)=>String(a.position).localeCompare(String(b.position)));
     const totalCost=tires.reduce((s,x)=>s+n(x.cost),0)+events.reduce((s,x)=>s+n(x.cost),0);
     $('tab-tires').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Dedicated Tire Tracker</h3><div class="subtle">Track each tire separately, including installation mileage, patches, repairs and rotations.</div></div><div class="table-actions"><button class="btn btn-secondary btn-small" type="button" onclick="openTireEventModal()">＋ Tire Event</button><button class="btn btn-primary btn-small" type="button" onclick="openTireModal()">＋ Add Tire</button></div></div>
       <div class="feature-grid" style="margin-bottom:12px"><div class="feature-card"><div class="meta-label">Tires Recorded</div><div class="big">${tires.length}</div></div><div class="feature-card"><div class="meta-label">Patch Events</div><div class="big">${events.filter(x=>x.event_type==='Patched').length}</div></div><div class="feature-card"><div class="meta-label">Tire Spend</div><div class="big money">${money(totalCost)}</div></div></div>
-      ${sorted.length?`<div class="tire-grid">${sorted.map(t=>{const ev=events.filter(x=>x.tire_id===t.id).sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date)));const life=hasMileage(v.current_mileage)&&hasMileage(t.installed_mileage)?Math.max(0,n(v.current_mileage)-n(t.installed_mileage)):null;return `<div class="tire-card"><div class="tire-head"><div><span class="badge">🛞 ${esc(t.position)}</span><h4 style="margin:9px 0 3px">${esc(t.brand||'Brand not set')} ${esc(t.model||'')}</h4><div class="subtle">${esc(t.tire_size||'Size not set')} • ${esc(t.status||'Active')}</div></div><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openTireModal('${t.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteTire('${t.id}')" type="button">Delete</button></div></div><div class="meta-grid"><div class="meta-box"><div class="meta-label">Installed</div><div class="meta-value">${niceDate(t.installed_date)}</div></div><div class="meta-box"><div class="meta-label">Mileage Since Install</div><div class="meta-value km">${life===null?'—':km(life)}</div></div></div><div class="subtle" style="margin-top:10px">${ev.length?`${ev.length} tire event${ev.length===1?'':'s'} • Last: ${niceDate(ev[0].event_date)} ${esc(ev[0].event_type)}`:'No patch/repair events yet.'}</div><button class="btn btn-secondary btn-small" style="margin-top:10px" type="button" onclick="openTireEventModal(null,'${t.id}')">＋ Add Event</button></div>`}).join('')}</div>`:`<div class="muted-box">No tires recorded yet.</div>`}
+      ${sorted.length?`<div class="tire-grid">${sorted.map(t=>{const ev=events.filter(x=>x.tire_id===t.id).sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date)));const life=hasMileage(v.current_mileage)&&hasMileage(t.installed_mileage)?Math.max(0,n(v.current_mileage)-n(t.installed_mileage)):null;return `<div class="tire-card ${tirePositionClass(t.position)}"><div class="tire-head"><div><span class="tire-position-badge ${tirePositionClass(t.position)}">🛞 ${esc(t.position)}</span><h4 style="margin:10px 0 3px">${esc(t.brand||'Brand not set')} ${esc(t.model||'')}</h4><div class="subtle">${esc(t.tire_size||'Size not set')} • ${esc(t.status||'Active')}</div></div><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openTireModal('${t.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteTire('${t.id}')" type="button">Delete</button></div></div><div class="meta-grid"><div class="meta-box"><div class="meta-label">Installed</div><div class="meta-value">${niceDate(t.installed_date)}</div></div><div class="meta-box"><div class="meta-label">Mileage Since Install</div><div class="meta-value km">${life===null?'—':km(life)}</div></div></div><div class="subtle" style="margin-top:10px">${ev.length?`${ev.length} tire event${ev.length===1?'':'s'} • Last: ${niceDate(ev[0].event_date)} ${esc(ev[0].event_type)}`:'No patch/repair events yet.'}</div><button class="btn btn-secondary btn-small" style="margin-top:10px" type="button" onclick="openTireEventModal(null,'${t.id}')">＋ Add Event</button></div>`}).join('')}</div>`:`<div class="muted-box">No tires recorded yet.</div>`}
     </div>
     <div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Tire Event History</h3></div>${events.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Tire</th><th>Event</th><th>Mileage</th><th>Cost</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${[...events].sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date))).map(e=>{const t=tires.find(x=>x.id===e.tire_id);return `<tr><td>${niceDate(e.event_date)}</td><td>${t?esc(tireLabel(t)):'Deleted tire'}</td><td><span class="badge">${esc(e.event_type)}</span></td><td class="km">${hasMileage(e.mileage)?km(e.mileage):'—'}</td><td class="money">${money(e.cost)}</td><td class="note">${esc(e.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openTireEventModal('${e.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteTireEvent('${e.id}')" type="button">Delete</button></div></td></tr>`}).join('')}</tbody></table></div>`:`<div class="muted-box">No tire events yet.</div>`}</div>`;
   }
 
-  function renderExpenses(pms,maint,misc,docs,tires,tireEvents){
-    const sums={PMS:pms.reduce((s,x)=>s+n(x.total_cost),0),Repairs:maint.reduce((s,x)=>s+n(x.cost),0),Misc:misc.reduce((s,x)=>s+n(x.cost),0),Documents:docs.reduce((s,x)=>s+n(x.cost),0),Tires:tires.reduce((s,x)=>s+n(x.cost),0)+tireEvents.reduce((s,x)=>s+n(x.cost),0)};
+  function renderExpenses(pms,maint,misc,docs,tires,tireEvents,fuelLogs){
+    const sums={PMS:pms.reduce((s,x)=>s+n(x.total_cost),0),Repairs:maint.reduce((s,x)=>s+n(x.cost),0),Fuel:fuelLogs.reduce((s,x)=>s+n(x.total_cost),0),Misc:misc.reduce((s,x)=>s+n(x.cost),0),Documents:docs.reduce((s,x)=>s+n(x.cost),0),Tires:tires.reduce((s,x)=>s+n(x.cost),0)+tireEvents.reduce((s,x)=>s+n(x.cost),0)};
     const total=Object.values(sums).reduce((a,b)=>a+b,0), max=Math.max(...Object.values(sums),1);
-    $('tab-expenses').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Vehicle Expense Dashboard</h3><div class="subtle">Includes PMS, repairs, tire tracker, registration/insurance and optional upgrades/miscellaneous spending.</div></div><button class="btn btn-primary btn-small" onclick="openExpenseModal()" type="button">＋ Add Misc / Upgrade</button></div>
+    $('tab-expenses').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Vehicle Expense Dashboard</h3><div class="subtle">Includes PMS, repairs, fuel, tire tracker, registration/insurance and optional upgrades/miscellaneous spending.</div></div><button class="btn btn-primary btn-small" onclick="openExpenseModal()" type="button">＋ Add Misc / Upgrade</button></div>
       <div class="feature-grid"><div class="feature-card"><div class="meta-label">Lifetime Recorded Spend</div><div class="big money">${money(total)}</div></div>${Object.entries(sums).map(([k,v])=>`<div class="feature-card"><div class="meta-label">${k}</div><div class="big">${money(v)}</div><div class="breakdown-bar"><div class="breakdown-fill" style="width:${Math.round(v/max*100)}%"></div></div></div>`).join('')}</div><div class="subtle" style="margin-top:10px">Totals count each record entered. Avoid entering the same tire charge in both Tire Tracker and Parts & Repairs if you do not want it counted twice.</div></div>
       <div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Miscellaneous / Upgrades</h3><div class="subtle">Optional purchases and upgrades that are not required maintenance.</div></div><button class="btn btn-primary btn-small" onclick="openExpenseModal()" type="button">＋ Add Expense</button></div>${misc.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Mileage</th><th>Shop / Seller</th><th>Cost</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${[...misc].sort((a,b)=>String(b.expense_date).localeCompare(String(a.expense_date))).map(r=>`<tr><td>${niceDate(r.expense_date)}</td><td><span class="badge">${esc(r.category)}</span></td><td><b>${esc(r.description)}</b></td><td class="km">${hasMileage(r.mileage)?km(r.mileage):'—'}</td><td>${esc(r.shop||'—')}</td><td class="money">${money(r.cost)}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openExpenseModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteExpense('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No miscellaneous or upgrade expenses yet.</div>`}</div>`;
+  }
+
+  function renderFuel(rows,v){
+    const sorted=[...rows].sort((a,b)=>String(b.fuel_date||b.created_at||'').localeCompare(String(a.fuel_date||a.created_at||'')));
+    const econ=fuelEconomyData(rows),totalSpend=rows.reduce((s,x)=>s+n(x.total_cost),0),totalLiters=rows.reduce((s,x)=>s+n(x.liters),0),avgPrice=totalLiters>0?totalSpend/totalLiters:null;
+    $('tab-fuel').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Fuel Log + Fuel Economy</h3><div class="subtle">Track fuel spending and calculate fill-to-fill efficiency. Partial fills between full tanks are included in the calculation.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openFuelModal()">＋ Add Fuel</button></div>
+      <div class="feature-grid"><div class="feature-card"><div class="meta-label">Fuel Records</div><div class="big">${rows.length}</div></div><div class="feature-card"><div class="meta-label">Fuel Spend</div><div class="big money">${money(totalSpend)}</div></div><div class="feature-card"><div class="meta-label">Total Liters</div><div class="big fuel-number">${totalLiters?`${fmtNumber(totalLiters,2)} L`:'—'}</div></div><div class="feature-card"><div class="meta-label">Average Price / L</div><div class="big">${avgPrice?money(avgPrice):'—'}</div></div><div class="feature-card"><div class="meta-label">Average Fuel Economy</div><div class="big stat-cyan">${econ.average?`${econ.average.toFixed(2)} km/L`:'—'}</div></div><div class="feature-card"><div class="meta-label">Measured Distance</div><div class="big">${econ.totalDistance?km(econ.totalDistance):'—'}</div></div></div>
+      ${sorted.length?`<div class="table-wrap" style="margin-top:14px"><table><thead><tr><th>Date</th><th>Odometer</th><th>Liters</th><th>Price/L</th><th>Total</th><th>Tank</th><th>Economy</th><th>Station</th><th>Fuel</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${sorted.map(r=>{const e=econ.byId[r.id];return `<tr><td>${niceDate(r.fuel_date)}</td><td class="km">${hasMileage(r.odometer)?km(r.odometer):'—'}</td><td>${r.liters!==null&&r.liters!==undefined?`${fmtNumber(r.liters,3)} L`:'—'}</td><td>${moneyOptional(r.price_per_liter)}</td><td class="money">${moneyOptional(r.total_cost)}</td><td>${r.full_tank?'<span class="badge status-good">Full</span>':'<span class="badge">Partial</span>'}</td><td class="stat-cyan"><b>${e?`${e.kpl.toFixed(2)} km/L`:'—'}</b>${e?`<div class="subtle">${fmtNumber(e.distance,1)} km / ${fmtNumber(e.liters,2)} L</div>`:''}</td><td>${esc(r.station||'—')}</td><td>${esc(r.fuel_type||'—')}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openFuelModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteFuel('${r.id}')" type="button">Delete</button></div></td></tr>`}).join('')}</tbody></table></div>`:`<div class="muted-box" style="margin-top:14px">No fuel logs yet.</div>`}</div>`;
+  }
+
+  function timelineDate(row,...fields){for(const f of fields){if(row?.[f])return String(row[f]).slice(0,10)}return row?.created_at?String(row.created_at).slice(0,10):''}
+  function renderTimeline(v,pms,maint,hist,reminders,tires,tireEvents,fuelLogs,misc,docs,issues,photos){
+    const events=[];
+    const push=(date,icon,title,meta='',details='',created='')=>events.push({date:date||'',icon,title,meta,details,sortKey:date||String(created||'').slice(0,10),created:created||''});
+    pms.forEach(r=>push(timelineDate(r,'service_date'),'🧰','PMS / Service',[hasMileage(r.mileage)?km(r.mileage):'',r.total_cost!==null&&r.total_cost!==undefined?money(r.total_cost):'',r.shop||''].filter(Boolean).join(' • '),pmsItemsFor(r.id).length?`Serviced: ${pmsItemsFor(r.id).map(x=>x.item_name).join(', ')}`:(r.notes||''),r.created_at));
+    maint.forEach(r=>push(timelineDate(r,'event_date'),'🔧',[r.part_name,r.action].filter(Boolean).join(' — ')||'Part / Repair',[hasMileage(r.mileage)?km(r.mileage):'',r.cost!==null&&r.cost!==undefined?money(r.cost):'',r.shop||''].filter(Boolean).join(' • '),r.notes||'',r.created_at));
+    hist.forEach(r=>push(timelineDate(r,'reading_date'),'🧭','Mileage Update',hasMileage(r.mileage)?km(r.mileage):'',r.notes||'',r.created_at));
+    reminders.forEach(r=>push(timelineDate(r,'due_date'),'🔔',`Reminder: ${r.title||'Maintenance'}`,[r.is_done?'Done':reminderStatus(r,v).label,hasMileage(r.due_mileage)?`Due ${km(r.due_mileage)}`:''].filter(Boolean).join(' • '),r.notes||'',r.created_at));
+    tires.forEach(r=>push(timelineDate(r,'installed_date'),'🛞',`Tire ${r.position||''} ${r.brand||''} ${r.model||''}`.trim(),[hasMileage(r.installed_mileage)?km(r.installed_mileage):'',r.cost?money(r.cost):''].filter(Boolean).join(' • '),r.notes||'',r.created_at));
+    tireEvents.forEach(r=>{const t=state.tires.find(x=>x.id===r.tire_id);push(timelineDate(r,'event_date'),'🛞',`${r.event_type||'Tire Event'}${t?` — ${tireLabel(t)}`:''}`,[hasMileage(r.mileage)?km(r.mileage):'',r.cost?money(r.cost):''].filter(Boolean).join(' • '),r.notes||'',r.created_at)});
+    fuelLogs.forEach(r=>push(timelineDate(r,'fuel_date'),'⛽','Fuel',[r.liters?`${fmtNumber(r.liters,2)} L`:'',r.total_cost!==null&&r.total_cost!==undefined?money(r.total_cost):'',hasMileage(r.odometer)?km(r.odometer):''].filter(Boolean).join(' • '),[r.station,r.fuel_type].filter(Boolean).join(' • '),r.created_at));
+    misc.forEach(r=>push(timelineDate(r,'expense_date'),'💸',r.description||r.category||'Expense',[r.cost!==null&&r.cost!==undefined?money(r.cost):'',hasMileage(r.mileage)?km(r.mileage):'',r.shop||''].filter(Boolean).join(' • '),r.notes||'',r.created_at));
+    docs.forEach(r=>push(timelineDate(r,'issue_date'),'📄',r.document_type||'Vehicle Document',[r.provider||'',r.cost?money(r.cost):'',r.expiry_date&&!r.never_expires?`Expires ${niceDate(r.expiry_date)}`:(r.never_expires?'Never expires':'')].filter(Boolean).join(' • '),r.notes||'',r.created_at));
+    issues.forEach(r=>{push(timelineDate(r,'reported_date'),'⚠️',`Issue: ${r.title||'Known issue'}`,[r.priority||'',hasMileage(r.mileage)?km(r.mileage):''].filter(Boolean).join(' • '),r.notes||'',r.created_at);if(r.resolved_date)push(r.resolved_date,'✅',`Resolved: ${r.title||'Issue'}`,'',r.notes||'',r.updated_at)});
+    photos.forEach(r=>push(String(r.created_at||'').slice(0,10),'📸','Vehicle Photo Added','',r.caption||'',r.created_at));
+    events.sort((a,b)=>String(b.sortKey).localeCompare(String(a.sortKey))||String(b.created).localeCompare(String(a.created)));
+    $('tab-timeline').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Complete Vehicle Timeline</h3><div class="subtle">One chronological history across PMS, repairs, tires, fuel, mileage, documents, expenses, issues, reminders and photos.</div></div></div>${events.length?`<div class="timeline">${events.map(e=>`<div class="timeline-item"><div class="timeline-dot">${e.icon}</div><div class="timeline-card"><div class="timeline-head"><div class="timeline-title">${esc(e.title)}</div><div class="timeline-date">${e.date?niceDate(e.date):'Date not set'}</div></div>${e.meta?`<div class="subtle" style="margin-top:5px">${esc(e.meta)}</div>`:''}${e.details?`<div class="note" style="margin-top:7px">${esc(e.details)}</div>`:''}</div></div>`).join('')}</div>`:`<div class="muted-box">No timeline activity yet.</div>`}</div>`;
+  }
+
+  function renderGallery(rows,v){
+    const sorted=[...rows].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+    $('tab-gallery').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Vehicle Photo Gallery</h3><div class="subtle">Keep multiple vehicle photos, upgrades, condition photos, damage photos or memories in one place.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openGalleryModal()">＋ Add Photos</button></div>${sorted.length?`<div class="gallery-grid">${sorted.map(r=>{const u=imageUrl(r.storage_path),isMain=v.image_path===r.storage_path;return `<article class="gallery-card"><a class="gallery-image" href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Vehicle gallery photo"></a><div class="gallery-body"><div class="subtle">${new Date(r.created_at).toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}${isMain?' • Main photo':''}</div>${r.caption?`<div style="font-weight:850;margin-top:4px">${esc(r.caption)}</div>`:''}<div class="gallery-actions">${!isMain?`<button class="btn btn-secondary btn-small" type="button" onclick="setMainPhoto('${r.id}')">Use as Main</button>`:'<span class="badge status-good">Main Photo</span>'}<button class="btn btn-danger btn-small" type="button" onclick="deleteGalleryPhoto('${r.id}')">Delete</button></div></div></article>`}).join('')}</div>`:`<div class="muted-box">No gallery photos yet. You can upload several photos at once.</div>`}</div>`;
   }
 
   function renderDocuments(rows){
@@ -706,11 +876,11 @@
     </div>`;
   }
 
-  function showTab(name){ state.activeTab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name)); ['overview','pms','maintenance','reminders','tires','expenses','documents','shops','issues','mileage'].forEach(x=>$(`tab-${x}`).classList.toggle('hidden',x!==name)); }
+  function showTab(name){ state.activeTab=name; document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name)); ['overview','pms','maintenance','reminders','tires','fuel','expenses','documents','shops','issues','timeline','gallery','mileage'].forEach(x=>$(`tab-${x}`).classList.toggle('hidden',x!==name)); }
 
   function openVehicleModal(id=null){
     clearMsg('vehicleMessage'); $('vehicleForm').reset(); $('vehicleId').value='';$('existingImagePath').value='';$('photoPreview').innerHTML='📷';$('vehicleModalTitle').textContent=id?'Edit Vehicle':'Add Vehicle';
-    if(id){ const v=state.vehicles.find(x=>x.id===id); if(!v)return; $('vehicleId').value=v.id;$('existingImagePath').value=v.image_path||'';$('nickname').value=v.nickname||'';$('vehicleType').value=v.vehicle_type||'Car';$('brand').value=v.brand||'';$('model').value=v.model||'';$('year').value=v.year||'';$('color').value=v.color||'';$('plateNumber').value=v.plate_number||'';$('currentMileage').value=v.current_mileage??''; const u=imageUrl(v.image_path); if(u)$('photoPreview').innerHTML=`<img src="${esc(u)}" alt="Preview">`; }
+    if(id){ const v=state.vehicles.find(x=>x.id===id); if(!v)return; $('vehicleId').value=v.id;$('existingImagePath').value=v.image_path||'';$('nickname').value=v.nickname||'';$('ownerName').value=v.owner_name||'';$('vehicleType').value=v.vehicle_type||'Car';$('brand').value=v.brand||'';$('model').value=v.model||'';$('year').value=v.year||'';$('color').value=v.color||'';$('plateNumber').value=v.plate_number||'';$('currentMileage').value=v.current_mileage??''; const u=imageUrl(v.image_path); if(u)$('photoPreview').innerHTML=`<img src="${esc(u)}" alt="Preview">`; }
     openModal('vehicleModal');
   }
 
@@ -736,7 +906,7 @@
       const mileageRaw=$('currentMileage').value.trim();
       const currentMileage=mileageRaw===''?null:Number(mileageRaw);
       const previousMileage=(state.vehicles.find(x=>x.id===id)||{}).current_mileage;
-      const payload={id,nickname:$('nickname').value.trim(),vehicle_type:$('vehicleType').value,brand:$('brand').value.trim(),model:$('model').value.trim(),year:$('year').value?Number($('year').value):null,color:$('color').value.trim()||null,plate_number:$('plateNumber').value.trim()||null,current_mileage:currentMileage,image_path:imagePath,updated_at:new Date().toISOString()};
+      const payload={id,nickname:$('nickname').value.trim(),owner_name:$('ownerName').value.trim()||null,vehicle_type:$('vehicleType').value,brand:$('brand').value.trim(),model:$('model').value.trim(),year:$('year').value?Number($('year').value):null,color:$('color').value.trim()||null,plate_number:$('plateNumber').value.trim()||null,current_mileage:currentMileage,image_path:imagePath,updated_at:new Date().toISOString()};
       const q=isEdit?supabaseClient.from('vehicles').update(payload).eq('id',id):supabaseClient.from('vehicles').insert(payload); const {error}=await q;if(error)throw error;
       const mileageChanged=hasMileage(currentMileage) && (!hasMileage(previousMileage) || Number(currentMileage)!==Number(previousMileage));
       if((!isEdit && hasMileage(currentMileage)) || (isEdit && mileageChanged)) await addMileageHistory(id,today(),currentMileage,isEdit?'Mileage updated from vehicle edit':'Initial mileage');
@@ -749,9 +919,29 @@
     row.querySelector('.pms-item-action').value=item.action||'Changed'; row.querySelector('.icon-delete').onclick=()=>{if(confirm('Remove this PMS item?'))row.remove();}; $('pmsItemsBox').appendChild(row);
   }
   $('addPmsItemBtn').onclick=()=>addPmsItemRow();
+  $('pmsAutoReminder').addEventListener('change',()=>$('pmsAutoReminderFields').classList.toggle('hidden',!$('pmsAutoReminder').checked));
+
+  function buildAutoPmsReminder(v,payload){
+    if(!$('pmsAutoReminder').checked)return null;
+    const everyKm=optionalNumber($('pmsNextKm').value),months=$('pmsNextMonths').value===''?null:parseInt($('pmsNextMonths').value,10);
+    if(!everyKm&&!months)throw new Error('For the automatic reminder, enter a kilometer interval, a month interval, or both.');
+    const baseMileage=hasMileage(payload.mileage)?Number(payload.mileage):(hasMileage(v.current_mileage)?Number(v.current_mileage):null);
+    const dueMileage=everyKm&&baseMileage!==null?baseMileage+Number(everyKm):null;
+    const dueDate=months&&payload.service_date?addMonthsToDate(payload.service_date,months):null;
+    if(dueMileage===null&&dueDate===null)throw new Error('The automatic reminder needs a PMS mileage for a km interval or a PMS date for a month interval.');
+    return {title:$('pmsReminderTitle').value.trim()||'Next PMS',category:'PMS',due_date:dueDate,due_mileage:dueMileage,repeat_km:everyKm||null,repeat_months:months||null,notes:'Automatically created from a PMS record.'};
+  }
+
+  async function saveAutoPmsReminder(v,data){
+    if(!data)return;
+    const {error:updateError}=await supabaseClient.from('maintenance_reminders').update({is_done:true,completed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('vehicle_id',v.id).eq('category','PMS').eq('title',data.title).eq('is_done',false);
+    if(updateError)throw updateError;
+    const {error}=await supabaseClient.from('maintenance_reminders').insert({id:crypto.randomUUID(),vehicle_id:v.id,...data,is_done:false});
+    if(error)throw error;
+  }
 
   function openPmsModal(id=null){
-    clearMsg('pmsMessage');$('pmsForm').reset();$('pmsId').value='';$('pmsItemsBox').innerHTML='';$('pmsDate').value='';$('pmsMileage').value='';$('pmsTotal').value='';$('pmsModalTitle').textContent=id?'Edit PMS':'Add PMS';
+    clearMsg('pmsMessage');$('pmsForm').reset();$('pmsId').value='';$('pmsItemsBox').innerHTML='';$('pmsDate').value='';$('pmsMileage').value='';$('pmsTotal').value='';$('pmsAutoReminder').checked=false;$('pmsAutoReminderFields').classList.add('hidden');$('pmsNextKm').value='';$('pmsNextMonths').value='';$('pmsReminderTitle').value='Next PMS';$('pmsModalTitle').textContent=id?'Edit PMS':'Add PMS';
     if(id){const p=state.pms.find(x=>x.id===id);if(!p)return;$('pmsId').value=p.id;$('pmsDate').value=p.service_date||'';$('pmsMileage').value=p.mileage??'';$('pmsTotal').value=p.total_cost??'';$('pmsShop').value=p.shop||'';$('pmsNotes').value=p.notes||'';pmsItemsFor(id).forEach(addPmsItemRow);} else addPmsItemRow(); openModal('pmsModal');
   }
 
@@ -759,10 +949,12 @@
     e.preventDefault();clearMsg('pmsMessage');const v=currentVehicle();if(!v)return;setBusy(true);
     try{
       const id=$('pmsId').value||crypto.randomUUID(),isEdit=!!$('pmsId').value; const payload={id,vehicle_id:v.id,service_date:$('pmsDate').value||null,mileage:optionalNumber($('pmsMileage').value),total_cost:optionalNumber($('pmsTotal').value),shop:$('pmsShop').value.trim()||null,notes:$('pmsNotes').value.trim()||null,updated_at:new Date().toISOString()};
+      const autoReminder=buildAutoPmsReminder(v,payload);
       const q=isEdit?supabaseClient.from('pms_records').update(payload).eq('id',id):supabaseClient.from('pms_records').insert(payload);const {error}=await q;if(error)throw error;
       if(isEdit){const {error:de}=await supabaseClient.from('pms_items').delete().eq('pms_id',id);if(de)throw de;}
       const items=[...document.querySelectorAll('#pmsItemsBox .pms-item-row')].map(r=>({pms_id:id,item_name:r.querySelector('.pms-item-name').value.trim(),action:r.querySelector('.pms-item-action').value,cost:n(r.querySelector('.pms-item-cost').value)})).filter(x=>x.item_name);
       if(items.length){const {error:ie}=await supabaseClient.from('pms_items').insert(items);if(ie)throw ie;}
+      await saveAutoPmsReminder(v,autoReminder);
       await bumpMileageIfHigher(v.id,payload.mileage,payload.service_date,'Mileage from PMS');closeModal('pmsModal');toast(isEdit?'PMS updated.':'PMS added.');await loadAll();renderVehicle();
     }catch(err){console.error(err);showError('pmsMessage',err.message||'Could not save PMS.');}finally{setBusy(false)}
   });
@@ -828,6 +1020,22 @@
   function openIssueModal(id=null){clearMsg('issueMessage');$('issueForm').reset();$('issueId').value='';$('issueDate').value=today();const v=currentVehicle();$('issueMileage').value=v?.current_mileage??'';$('issueModalTitle').textContent=id?'Edit Known Issue':'Add Known Issue';if(id){const r=state.issues.find(x=>x.id===id);if(!r)return;$('issueId').value=r.id;$('issueTitle').value=r.title;$('issueCategory').value=r.category||'Other';$('issuePriority').value=r.priority||'Medium';$('issueDate').value=r.reported_date;$('issueMileage').value=r.mileage??'';$('issueNotes').value=r.notes||'';}openModal('issueModal')}
   $('issueForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const id=$('issueId').value||crypto.randomUUID(),isEdit=!!$('issueId').value,existing=isEdit?state.issues.find(x=>x.id===id):null,payload={id,vehicle_id:v.id,title:$('issueTitle').value.trim(),category:$('issueCategory').value,priority:$('issuePriority').value,reported_date:$('issueDate').value,mileage:$('issueMileage').value===''?null:n($('issueMileage').value),status:existing?.status||'Open',resolved_date:existing?.resolved_date||null,notes:$('issueNotes').value.trim()||null,updated_at:new Date().toISOString()};const q=isEdit?supabaseClient.from('vehicle_issues').update(payload).eq('id',id):supabaseClient.from('vehicle_issues').insert(payload);const{error}=await q;if(error)throw error;if(hasMileage(payload.mileage))await bumpMileageIfHigher(v.id,payload.mileage,payload.reported_date,`Mileage from issue: ${payload.title}`);closeModal('issueModal');toast(isEdit?'Issue updated.':'Issue added.');await loadAll();renderVehicle();}catch(err){showError('issueMessage',err.message||'Could not save issue.')}finally{setBusy(false)}});
 
+  function openFuelModal(id=null){
+    clearMsg('fuelMessage');$('fuelForm').reset();$('fuelId').value='';$('fuelDate').value='';$('fuelOdometer').value='';$('fuelTotal').value='';$('fuelPrice').value='';$('fuelLiters').value='';$('fuelFullTank').checked=true;$('fuelModalTitle').textContent=id?'Edit Fuel Log':'Add Fuel Log';
+    if(id){const r=state.fuelLogs.find(x=>x.id===id);if(!r)return;$('fuelId').value=r.id;$('fuelDate').value=r.fuel_date||'';$('fuelOdometer').value=r.odometer??'';$('fuelLiters').value=r.liters??'';$('fuelPrice').value=r.price_per_liter??'';$('fuelTotal').value=r.total_cost??'';$('fuelType').value=r.fuel_type||'';$('fuelStation').value=r.station||'';$('fuelFullTank').checked=!!r.full_tank;$('fuelNotes').value=r.notes||'';}
+    openModal('fuelModal');
+  }
+  function syncFuelMath(){const liters=optionalNumber($('fuelLiters').value),price=optionalNumber($('fuelPrice').value),total=optionalNumber($('fuelTotal').value);if(liters&&price&&total===null)$('fuelTotal').value=(liters*price).toFixed(2);else if(liters&&total!==null&&price===null)$('fuelPrice').value=(total/liters).toFixed(2);}
+  $('fuelLiters').addEventListener('blur',syncFuelMath);$('fuelPrice').addEventListener('blur',syncFuelMath);$('fuelTotal').addEventListener('blur',syncFuelMath);
+  $('fuelForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const id=$('fuelId').value||crypto.randomUUID(),isEdit=!!$('fuelId').value;let liters=optionalNumber($('fuelLiters').value),price=optionalNumber($('fuelPrice').value),total=optionalNumber($('fuelTotal').value);if(total===null&&liters!==null&&price!==null)total=liters*price;if(price===null&&liters&&total!==null)price=total/liters;const payload={id,vehicle_id:v.id,fuel_date:$('fuelDate').value||null,odometer:optionalNumber($('fuelOdometer').value),liters,price_per_liter:price,total_cost:total,fuel_type:$('fuelType').value||null,station:$('fuelStation').value.trim()||null,full_tank:$('fuelFullTank').checked,notes:$('fuelNotes').value.trim()||null,updated_at:new Date().toISOString()};const q=isEdit?supabaseClient.from('fuel_logs').update(payload).eq('id',id):supabaseClient.from('fuel_logs').insert(payload);const{error}=await q;if(error)throw error;if(hasMileage(payload.odometer))await bumpMileageIfHigher(v.id,payload.odometer,payload.fuel_date,'Mileage from fuel log');closeModal('fuelModal');toast(isEdit?'Fuel log updated.':'Fuel log added.');await loadAll();renderVehicle();}catch(err){showError('fuelMessage',err.message||'Could not save fuel log. Run the latest SQL update if this feature is new.')}finally{setBusy(false)}});
+
+  function openGalleryModal(){clearMsg('galleryMessage');$('galleryForm').reset();$('gallerySelection').innerHTML='';openModal('galleryModal')}
+  $('galleryFiles').addEventListener('change',()=>{const files=[...$('galleryFiles').files];$('gallerySelection').innerHTML='';files.slice(0,20).forEach(f=>{const img=document.createElement('img');img.src=URL.createObjectURL(f);img.alt=f.name;$('gallerySelection').appendChild(img);});});
+  async function uploadGalleryPhoto(file,vehicleId,index){if(!file.type.startsWith('image/'))throw new Error(`"${file.name}" is not an image.`);if(file.size>10*1024*1024)throw new Error(`"${file.name}" is larger than 10 MB.`);const processed=await compressImage(file),ext=(processed.name.split('.').pop()||'jpg').toLowerCase(),path=`${vehicleId}/gallery/${Date.now()}-${index}-${crypto.randomUUID().slice(0,8)}.${ext}`;const{error}=await supabaseClient.storage.from(IMAGE_BUCKET).upload(path,processed,{cacheControl:'3600',upsert:false,contentType:processed.type});if(error)throw error;return path;}
+  $('galleryForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;const files=[...$('galleryFiles').files];if(!files.length){showError('galleryMessage','Choose at least one photo.');return}if(files.length>20){showError('galleryMessage','Upload up to 20 photos at a time.');return}setBusy(true,'Uploading photos…');const uploaded=[];try{const caption=$('galleryCaption').value.trim()||null,rows=[];for(let i=0;i<files.length;i++){const path=await uploadGalleryPhoto(files[i],v.id,i+1);uploaded.push(path);rows.push({id:crypto.randomUUID(),vehicle_id:v.id,storage_path:path,caption});}const{error}=await supabaseClient.from('vehicle_photos').insert(rows);if(error)throw error;if(!v.image_path&&rows[0]){const{error:ve}=await supabaseClient.from('vehicles').update({image_path:rows[0].storage_path,updated_at:new Date().toISOString()}).eq('id',v.id);if(ve)throw ve;}closeModal('galleryModal');toast(`${rows.length} photo${rows.length===1?'':'s'} uploaded.`);await loadAll();renderVehicle();}catch(err){if(uploaded.length)await supabaseClient.storage.from(IMAGE_BUCKET).remove(uploaded);showError('galleryMessage',err.message||'Could not upload photos. Run the latest SQL update if this feature is new.')}finally{setBusy(false)}});
+  async function setMainPhoto(id){const r=state.photos.find(x=>x.id===id),v=currentVehicle();if(!r||!v)return;setBusy(true);try{const{error}=await supabaseClient.from('vehicles').update({image_path:r.storage_path,updated_at:new Date().toISOString()}).eq('id',v.id);if(error)throw error;toast('Main vehicle photo updated.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Could not update main photo.')}finally{setBusy(false)}}
+  async function deleteGalleryPhoto(id){const r=state.photos.find(x=>x.id===id),v=currentVehicle();if(!r||!v||!confirm('Delete this gallery photo?'))return;setBusy(true,'Deleting…');try{if(v.image_path===r.storage_path){const{error:ve}=await supabaseClient.from('vehicles').update({image_path:null,updated_at:new Date().toISOString()}).eq('id',v.id);if(ve)throw ve;}const{error}=await supabaseClient.from('vehicle_photos').delete().eq('id',id);if(error)throw error;await supabaseClient.storage.from(IMAGE_BUCKET).remove([r.storage_path]);toast('Photo deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Could not delete photo.')}finally{setBusy(false)}}
+
   function openMileageModal(){const v=currentVehicle();if(!v)return;clearMsg('mileageMessage');$('mileageForm').reset();$('mileageDate').value=today();$('mileageValue').value=v.current_mileage??'';openModal('mileageModal');}
   $('mileageForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const reading=n($('mileageValue').value),date=$('mileageDate').value;const {error}=await supabaseClient.from('vehicles').update({current_mileage:reading,updated_at:new Date().toISOString()}).eq('id',v.id);if(error)throw error;await addMileageHistory(v.id,date,reading,$('mileageNotes').value.trim()||'Manual mileage update');closeModal('mileageModal');toast('Mileage updated.');await loadAll();renderVehicle();}catch(err){showError('mileageMessage',err.message||'Could not update mileage.');}finally{setBusy(false)}});
 
@@ -854,18 +1062,19 @@
 
   async function deleteVehicle(id){
     const v=state.vehicles.find(x=>x.id===id);if(!v)return;if(!confirm(`Delete ${v.nickname}?\n\nThis will permanently delete its PMS, parts/repair and mileage history.`))return;setBusy(true,'Deleting…');
-    try{const {error}=await supabaseClient.from('vehicles').delete().eq('id',id);if(error)throw error;if(v.image_path){await supabaseClient.storage.from(IMAGE_BUCKET).remove([v.image_path]);}toast('Vehicle deleted.');backToGarage();await loadAll();}catch(e){toast(e.message||'Delete failed.');}finally{setBusy(false)}
+    try{const galleryPaths=state.photos.filter(x=>x.vehicle_id===id).map(x=>x.storage_path).filter(Boolean);const {error}=await supabaseClient.from('vehicles').delete().eq('id',id);if(error)throw error;const paths=[v.image_path,...galleryPaths].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i);if(paths.length){await supabaseClient.storage.from(IMAGE_BUCKET).remove(paths);}toast('Vehicle deleted.');backToGarage();await loadAll();}catch(e){toast(e.message||'Delete failed.');}finally{setBusy(false)}
   }
   async function deletePms(id){if(!confirm('Delete this PMS record and its itemized changes?'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('pms_records').delete().eq('id',id);if(error)throw error;toast('PMS deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   async function deleteMaintenance(id){if(!confirm('Delete this parts/repair record?'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('maintenance_records').delete().eq('id',id);if(error)throw error;toast('Record deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   async function deleteMileage(id){if(!confirm('Delete this mileage history entry? This will not change the vehicle current mileage.'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('mileage_history').delete().eq('id',id);if(error)throw error;toast('Mileage entry deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
 
-  async function toggleReminderDone(id){const r=state.reminders.find(x=>x.id===id);if(!r)return;setBusy(true);try{const done=!r.is_done;const{error}=await supabaseClient.from('maintenance_reminders').update({is_done:done,completed_at:done?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;toast(done?'Reminder completed.':'Reminder reopened.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Could not update reminder.')}finally{setBusy(false)}}
+  async function toggleReminderDone(id){const r=state.reminders.find(x=>x.id===id);if(!r)return;setBusy(true);try{const done=!r.is_done;const{error}=await supabaseClient.from('maintenance_reminders').update({is_done:done,completed_at:done?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;if(done&&(n(r.repeat_km)>0||n(r.repeat_months)>0)){const v=currentVehicle();const dueMileage=n(r.repeat_km)>0?(hasMileage(v?.current_mileage)?Number(v.current_mileage)+n(r.repeat_km):(hasMileage(r.due_mileage)?Number(r.due_mileage)+n(r.repeat_km):null)):null;const dueDate=n(r.repeat_months)>0?addMonthsToDate(today(),n(r.repeat_months)):null;const{error:ne}=await supabaseClient.from('maintenance_reminders').insert({id:crypto.randomUUID(),vehicle_id:r.vehicle_id,title:r.title,category:r.category,due_date:dueDate,due_mileage:dueMileage,repeat_km:r.repeat_km||null,repeat_months:r.repeat_months||null,notes:r.notes||null,is_done:false});if(ne)throw ne;}toast(done?'Reminder completed. Next reminder created when a repeat interval is set.':'Reminder reopened.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Could not update reminder.')}finally{setBusy(false)}}
   async function toggleIssueResolved(id){const r=state.issues.find(x=>x.id===id);if(!r)return;setBusy(true);try{const resolved=r.status!=='Resolved';const{error}=await supabaseClient.from('vehicle_issues').update({status:resolved?'Resolved':'Open',resolved_date:resolved?today():null,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;toast(resolved?'Issue resolved.':'Issue reopened.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Could not update issue.')}finally{setBusy(false)}}
   async function deleteSimple(table,id,label){if(!confirm(`Delete this ${label}?\n\nThis cannot be undone.`))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from(table).delete().eq('id',id);if(error)throw error;toast(`${label.charAt(0).toUpperCase()+label.slice(1)} deleted.`);await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   const deleteReminder=id=>deleteSimple('maintenance_reminders',id,'reminder');
   const deleteTireEvent=id=>deleteSimple('tire_events',id,'tire event');
   const deleteExpense=id=>deleteSimple('misc_expenses',id,'expense');
+  const deleteFuel=id=>deleteSimple('fuel_logs',id,'fuel log');
   const deleteShop=id=>deleteSimple('vehicle_shops',id,'shop');
   const deleteIssue=id=>deleteSimple('vehicle_issues',id,'issue');
   async function deleteTire(id){if(!confirm('Delete this tire and all of its patch/repair events?\n\nThis cannot be undone.'))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from('tires').delete().eq('id',id);if(error)throw error;toast('Tire deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}

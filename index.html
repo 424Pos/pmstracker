@@ -167,6 +167,18 @@
     .timeline-card{border-radius:15px;padding:12px;background:#0d0912;border:1px solid #281b34}
     .timeline-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.timeline-title{font-weight:950}.timeline-date{font-size:.76rem;color:var(--muted);white-space:nowrap}
     .fuel-number{font-variant-numeric:tabular-nums}
+    .year-report-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+    .year-report-card{border-radius:16px;padding:14px;background:#0d0912;border:1px solid #281b34}
+    .year-report-card .year{font-size:1.15rem;font-weight:950;color:var(--lilac)}
+    .receipt-stack{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+    .receipt-link{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:5px 9px;border-radius:9px;border:1px solid #3a2850;background:#17101f;color:#e9dcf8;text-decoration:none;font-size:.76rem;font-weight:850;max-width:180px}
+    .receipt-link:hover{border-color:#8b5cf6;background:#21152d}
+    .receipt-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .receipt-count{background:rgba(124,58,237,.30);border-color:rgba(167,139,250,.42);color:#ede9fe}
+    .receipt-existing{display:grid;gap:8px;margin-top:10px}
+    .receipt-existing-row{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:9px 10px;border-radius:11px;background:#0d0912;border:1px solid #281b34}
+    .receipt-existing-row .file-meta{min-width:0;flex:1}
+    .receipt-existing-row .file-name{font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
     /* tables */
     .table-wrap{overflow:auto;border:1px solid #2a1d36;border-radius:16px}
@@ -212,6 +224,7 @@
       .vehicle-hero{grid-template-columns:240px 1fr}
       .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
       .quick-grid{grid-template-columns:1fr 1fr}
+      .year-report-grid{grid-template-columns:1fr 1fr}
       .tabs-shell{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;gap:6px;align-items:center}
       .tabs{min-width:0;width:100%;max-width:100%;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;scrollbar-width:thin;scrollbar-color:#8b5cf6 #17101f;scroll-snap-type:x proximity}
       .tabs::-webkit-scrollbar{display:block;height:7px}
@@ -496,6 +509,25 @@
     <div class="field full"><label>Notes</label><textarea id="expenseNotes" class="input" maxlength="1000" placeholder="Optional"></textarea></div>
   </div><div id="expenseMessage" class="message"></div><div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('expenseModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Expense</button></div></form></div></div>
 
+  <!-- Receipt / Invoice modal -->
+  <div id="receiptModal" class="modal hidden">
+    <div class="modal-card glass">
+      <div class="modal-head"><h2 class="modal-title">Receipt / Invoice Attachments</h2><button class="close-btn" type="button" onclick="closeModal('receiptModal')">×</button></div>
+      <form id="receiptForm">
+        <input id="receiptRecordType" type="hidden">
+        <input id="receiptRecordId" type="hidden">
+        <div class="muted-box" id="receiptRecordLabel">Attach proof of payment to this record.</div>
+        <div class="form-grid" style="margin-top:12px">
+          <div class="field full"><label>Receipt / Invoice Files</label><input id="receiptFiles" class="input" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf"></div>
+          <div class="field full"><label>Caption / Note</label><input id="receiptCaption" class="input" maxlength="180" placeholder="Optional, e.g. Official invoice or card receipt"></div>
+          <div class="field full"><label>Saved Attachments</label><div id="receiptExisting" class="receipt-existing"><div class="subtle">None yet.</div></div></div>
+        </div>
+        <div id="receiptMessage" class="message"></div>
+        <div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('receiptModal')">Close</button><button class="btn btn-primary" type="submit">Upload Attachment</button></div>
+      </form>
+    </div>
+  </div>
+
   <!-- Registration / Insurance modal -->
   <div id="documentModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><h2 id="documentModalTitle" class="modal-title">Add Registration / Insurance</h2><button class="close-btn" type="button" onclick="closeModal('documentModal')">×</button></div><form id="documentForm"><input id="documentId" type="hidden"><input id="existingDocumentPath" type="hidden"><div class="form-grid">
     <div class="field"><label>Type *</label><select id="documentType" class="input" required><option>Official Receipt (OR)</option><option>Certificate of Registration (CR)</option><option>Insurance</option><option>Emission Test</option><option>CTPL</option><option>Other</option></select></div>
@@ -538,8 +570,9 @@
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const IMAGE_BUCKET = "vehicle-images";
   const DOC_BUCKET = "vehicle-documents";
+  const RECEIPT_BUCKET = "expense-receipts";
 
-  const state = { vehicles:[], pms:[], pmsItems:[], maintenance:[], mileage:[], reminders:[], tires:[], tireEvents:[], fuelLogs:[], photos:[], expenses:[], documents:[], shops:[], issues:[], currentVehicleId:null, activeTab:"overview" };
+  const state = { vehicles:[], pms:[], pmsItems:[], maintenance:[], mileage:[], reminders:[], tires:[], tireEvents:[], fuelLogs:[], photos:[], expenses:[], receipts:[], documents:[], shops:[], issues:[], currentVehicleId:null, activeTab:"overview" };
   const $ = id => document.getElementById(id);
   const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const n = v => Number(v || 0);
@@ -575,6 +608,8 @@
   function latestPms(vehicleId){ return state.pms.filter(x=>x.vehicle_id===vehicleId).sort(comparePms)[0] || null; }
   function pmsItemsFor(pmsId){ return state.pmsItems.filter(x=>x.pms_id===pmsId); }
   function docUrl(path){ if(!path)return ''; return supabaseClient.storage.from(DOC_BUCKET).getPublicUrl(path).data.publicUrl; }
+  function receiptUrl(path){ if(!path)return ''; return supabaseClient.storage.from(RECEIPT_BUCKET).getPublicUrl(path).data.publicUrl; }
+  function receiptsFor(recordType,recordId){ return state.receipts.filter(x=>x.record_type===recordType && x.record_id===recordId); }
   function normalizeName(v){ return String(v||'').trim().toLowerCase(); }
   function daysUntil(date){ if(!date)return null; const a=new Date(today()+'T00:00:00'),b=new Date(date+'T00:00:00'); return Math.ceil((b-a)/86400000); }
   function fuelEconomyData(logs){
@@ -630,7 +665,7 @@
   async function loadAll(){
     setBusy(true,'Loading…');
     try{
-      const [vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,dr,sr,xr]=await Promise.all([
+      const [vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,ar,dr,sr,xr]=await Promise.all([
         supabaseClient.from('vehicles').select('*').order('created_at',{ascending:true}),
         supabaseClient.from('pms_records').select('*').order('service_date',{ascending:false}),
         supabaseClient.from('pms_items').select('*').order('created_at',{ascending:true}),
@@ -642,13 +677,14 @@
         optionalSelect('fuel_logs','created_at',false),
         optionalSelect('vehicle_photos','created_at',false),
         supabaseClient.from('misc_expenses').select('*').order('expense_date',{ascending:false}),
+        optionalSelect('expense_attachments','created_at',false),
         supabaseClient.from('vehicle_documents').select('*').order('created_at',{ascending:false}),
         supabaseClient.from('vehicle_shops').select('*').order('name',{ascending:true}),
         supabaseClient.from('vehicle_issues').select('*').order('reported_date',{ascending:false})
       ]);
-      const all=[vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,dr,sr,xr], bad=all.find(x=>x.error); if(bad)throw bad.error;
+      const all=[vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,ar,dr,sr,xr], bad=all.find(x=>x.error); if(bad)throw bad.error;
       state.vehicles=vr.data||[]; state.pms=pr.data||[]; state.pmsItems=ir.data||[]; state.maintenance=mr.data||[]; state.mileage=hr.data||[];
-      state.reminders=rr.data||[]; state.tires=tr.data||[]; state.tireEvents=ter.data||[]; state.fuelLogs=fr.data||[]; state.photos=phr.data||[]; state.expenses=er.data||[]; state.documents=dr.data||[]; state.shops=sr.data||[]; state.issues=xr.data||[];
+      state.reminders=rr.data||[]; state.tires=tr.data||[]; state.tireEvents=ter.data||[]; state.fuelLogs=fr.data||[]; state.photos=phr.data||[]; state.expenses=er.data||[]; state.receipts=ar.data||[]; state.documents=dr.data||[]; state.shops=sr.data||[]; state.issues=xr.data||[];
       renderGarage(); if(state.currentVehicleId && state.vehicles.some(v=>v.id===state.currentVehicleId)) renderVehicle();
     }catch(e){ console.error(e); toast('Database needs the latest SQL update. Run feature_update.sql in Supabase.'); }
     finally{setBusy(false)}
@@ -716,7 +752,7 @@
 
   function renderVehicle(){
     const v=currentVehicle(); if(!v){backToGarage();return}
-    const pms=recordsForVehicle(state.pms), maint=recordsForVehicle(state.maintenance), hist=recordsForVehicle(state.mileage), reminders=recordsForVehicle(state.reminders), tires=recordsForVehicle(state.tires), tireEvents=recordsForVehicle(state.tireEvents), fuelLogs=recordsForVehicle(state.fuelLogs), photos=recordsForVehicle(state.photos), expenses=recordsForVehicle(state.expenses), documents=recordsForVehicle(state.documents), shops=recordsForVehicle(state.shops), issues=recordsForVehicle(state.issues);
+    const pms=recordsForVehicle(state.pms), maint=recordsForVehicle(state.maintenance), hist=recordsForVehicle(state.mileage), reminders=recordsForVehicle(state.reminders), tires=recordsForVehicle(state.tires), tireEvents=recordsForVehicle(state.tireEvents), fuelLogs=recordsForVehicle(state.fuelLogs), photos=recordsForVehicle(state.photos), expenses=recordsForVehicle(state.expenses), receipts=recordsForVehicle(state.receipts), documents=recordsForVehicle(state.documents), shops=recordsForVehicle(state.shops), issues=recordsForVehicle(state.issues);
     const last=latestPms(v.id), url=imageUrl(v.image_path), totalPms=pms.reduce((s,x)=>s+n(x.total_cost),0), totalMaint=maint.reduce((s,x)=>s+n(x.cost),0), totalFuel=fuelLogs.reduce((s,x)=>s+n(x.total_cost),0), totalMisc=expenses.reduce((s,x)=>s+n(x.cost),0), totalDocs=documents.reduce((s,x)=>s+n(x.cost),0), totalTires=tires.reduce((s,x)=>s+n(x.cost),0)+tireEvents.reduce((s,x)=>s+n(x.cost),0), total=totalPms+totalMaint+totalFuel+totalMisc+totalDocs+totalTires;
     $('vehicleHero').innerHTML=`<div class="hero-photo">${url?`<img src="${esc(url)}" alt="${esc(v.nickname)}">`:`<div class="vehicle-placeholder">${vehicleEmoji(v.vehicle_type)}</div>`}</div>
       <div class="hero-main"><div><h1 class="hero-name">${esc(v.nickname)}</h1><div style="font-size:1.05rem;font-weight:850">${esc(v.brand)} ${esc(v.model)} ${v.year?`• ${esc(v.year)}`:''}</div><div class="hero-tags"><span class="badge">${esc(v.vehicle_type)}</span>${v.owner_name?`<span class="badge">👤 ${esc(v.owner_name)}</span>`:''}${v.color?`<span class="badge">🎨 ${esc(v.color)}</span>`:''}${v.plate_number?`<span class="badge">${esc(v.plate_number)}</span>`:''}${v.is_sold?`<span class="badge sold-hero-badge">🏷️ SOLD</span>`:''}</div></div>
@@ -729,7 +765,7 @@
       <div class="stat glass"><div class="stat-label">Total Recorded Spend</div><div class="stat-value stat-orange">${money(total)}</div></div>`;
     shopNameOptions();
     renderOverview(v,pms,maint,hist,last,totalPms,totalMaint,reminders,issues,documents,total,fuelLogs,photos);
-    renderPms(pms); renderMaintenance(maint); renderReminders(reminders,v); renderTires(tires,tireEvents,v); renderFuel(fuelLogs,v); renderExpenses(pms,maint,expenses,documents,tires,tireEvents,fuelLogs); renderDocuments(documents); renderShops(shops,pms,maint,expenses); renderIssues(issues,v); renderTimeline(v,pms,maint,hist,reminders,tires,tireEvents,fuelLogs,expenses,documents,issues,photos); renderGallery(photos,v); renderMileage(hist);
+    renderPms(pms); renderMaintenance(maint); renderReminders(reminders,v); renderTires(tires,tireEvents,v); renderFuel(fuelLogs,v); renderExpenses(pms,maint,expenses,documents,tires,tireEvents,fuelLogs,hist,receipts); renderDocuments(documents); renderShops(shops,pms,maint,expenses); renderIssues(issues,v); renderTimeline(v,pms,maint,hist,reminders,tires,tireEvents,fuelLogs,expenses,documents,issues,photos); renderGallery(photos,v); renderMileage(hist);
     showTab(state.activeTab);
   }
 
@@ -829,12 +865,67 @@
     <div class="panel glass"><div class="panel-title-row"><h3 class="panel-title">Tire Event History</h3></div>${events.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Tire</th><th>Event</th><th>Mileage</th><th>Cost</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${[...events].sort((a,b)=>String(b.event_date).localeCompare(String(a.event_date))).map(e=>{const t=tires.find(x=>x.id===e.tire_id);return `<tr><td>${niceDate(e.event_date)}</td><td>${t?esc(tireLabel(t)):'Deleted tire'}</td><td><span class="badge">${esc(e.event_type)}</span></td><td class="km">${hasMileage(e.mileage)?km(e.mileage):'—'}</td><td class="money">${money(e.cost)}</td><td class="note">${esc(e.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openTireEventModal('${e.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteTireEvent('${e.id}')" type="button">Delete</button></div></td></tr>`}).join('')}</tbody></table></div>`:`<div class="muted-box">No tire events yet.</div>`}</div>`;
   }
 
-  function renderExpenses(pms,maint,misc,docs,tires,tireEvents,fuelLogs){
+  function expenseRecordInfo(type,id){
+    let r=null,title='',date='',cost=null,mileage=null;
+    if(type==='pms'){
+      r=state.pms.find(x=>x.id===id); if(!r)return null;
+      title=[r.shop||'PMS / Service', pmsItemsFor(r.id).map(x=>x.item_name).filter(Boolean).slice(0,3).join(', ')].filter(Boolean).join(' — ');
+      date=r.service_date||''; cost=r.total_cost; mileage=r.mileage;
+    }else if(type==='repair'){
+      r=state.maintenance.find(x=>x.id===id); if(!r)return null;
+      title=[r.part_name,r.action].filter(Boolean).join(' — ')||r.category||'Part / Repair'; date=r.event_date||''; cost=r.cost; mileage=r.mileage;
+    }else{
+      r=state.expenses.find(x=>x.id===id); if(!r)return null;
+      title=r.description||r.category||'Misc / Upgrade'; date=r.expense_date||''; cost=r.cost; mileage=r.mileage;
+    }
+    return {r,title,date,cost,mileage,type};
+  }
+
+  function expenseDateYear(value){ return value ? String(value).slice(0,4) : null; }
+  function renderReceiptLinks(type,id){
+    const rows=receiptsFor(type,id);
+    if(!rows.length)return '<span class="subtle">No attachment</span>';
+    return `<div class="receipt-stack">${rows.slice(0,3).map(x=>`<a class="receipt-link" href="${esc(receiptUrl(x.storage_path))}" target="_blank" rel="noopener" title="${esc(x.file_name||'Attachment')}">📎 <span>${esc(x.file_name||'Attachment')}</span></a>`).join('')}${rows.length>3?`<span class="badge receipt-count">+${rows.length-3}</span>`:''}</div>`;
+  }
+
+  function renderExpenses(pms,maint,misc,docs,tires,tireEvents,fuelLogs,hist,receipts){
     const sums={PMS:pms.reduce((s,x)=>s+n(x.total_cost),0),Repairs:maint.reduce((s,x)=>s+n(x.cost),0),Fuel:fuelLogs.reduce((s,x)=>s+n(x.total_cost),0),Misc:misc.reduce((s,x)=>s+n(x.cost),0),Documents:docs.reduce((s,x)=>s+n(x.cost),0),Tires:tires.reduce((s,x)=>s+n(x.cost),0)+tireEvents.reduce((s,x)=>s+n(x.cost),0)};
     const total=Object.values(sums).reduce((a,b)=>a+b,0), max=Math.max(...Object.values(sums),1);
+
+    const yearSet=new Set();
+    const addYear=v=>{const y=expenseDateYear(v);if(y)yearSet.add(y)};
+    pms.forEach(x=>addYear(x.service_date)); maint.forEach(x=>addYear(x.event_date)); misc.forEach(x=>addYear(x.expense_date)); docs.forEach(x=>addYear(x.issue_date)); fuelLogs.forEach(x=>addYear(x.fuel_date)); tires.forEach(x=>addYear(x.installed_date)); tireEvents.forEach(x=>addYear(x.event_date)); hist.forEach(x=>addYear(x.reading_date));
+    const years=[...yearSet].sort((a,b)=>b.localeCompare(a));
+    const readingsByYear={};
+    const addReading=(date,mileage)=>{const y=expenseDateYear(date);if(!y||!hasMileage(mileage))return;(readingsByYear[y]??=[]).push(Number(mileage));};
+    hist.forEach(x=>addReading(x.reading_date,x.mileage)); pms.forEach(x=>addReading(x.service_date,x.mileage)); maint.forEach(x=>addReading(x.event_date,x.mileage)); misc.forEach(x=>addReading(x.expense_date,x.mileage)); fuelLogs.forEach(x=>addReading(x.fuel_date,x.odometer)); tires.forEach(x=>addReading(x.installed_date,x.installed_mileage)); tireEvents.forEach(x=>addReading(x.event_date,x.mileage));
+    const yearly=years.map(year=>{
+      const inYear=(date)=>expenseDateYear(date)===year;
+      const parts={
+        PMS:pms.filter(x=>inYear(x.service_date)).reduce((s,x)=>s+n(x.total_cost),0),
+        Repairs:maint.filter(x=>inYear(x.event_date)).reduce((s,x)=>s+n(x.cost),0),
+        Fuel:fuelLogs.filter(x=>inYear(x.fuel_date)).reduce((s,x)=>s+n(x.total_cost),0),
+        Misc:misc.filter(x=>inYear(x.expense_date)).reduce((s,x)=>s+n(x.cost),0),
+        Documents:docs.filter(x=>inYear(x.issue_date)).reduce((s,x)=>s+n(x.cost),0),
+        Tires:tires.filter(x=>inYear(x.installed_date)).reduce((s,x)=>s+n(x.cost),0)+tireEvents.filter(x=>inYear(x.event_date)).reduce((s,x)=>s+n(x.cost),0)
+      };
+      const vals=readingsByYear[year]||[],distance=vals.length>=2?Math.max(...vals)-Math.min(...vals):null;
+      return {year,parts,total:Object.values(parts).reduce((a,b)=>a+b,0),distance};
+    });
+
+    const receiptRows=[
+      ...pms.map(r=>({type:'pms',id:r.id,date:r.service_date||r.created_at||'',title:expenseRecordInfo('pms',r.id)?.title||'PMS / Service',cost:r.total_cost,mileage:r.mileage})),
+      ...maint.map(r=>({type:'repair',id:r.id,date:r.event_date||r.created_at||'',title:expenseRecordInfo('repair',r.id)?.title||'Part / Repair',cost:r.cost,mileage:r.mileage})),
+      ...misc.map(r=>({type:'expense',id:r.id,date:r.expense_date||r.created_at||'',title:expenseRecordInfo('expense',r.id)?.title||'Misc / Upgrade',cost:r.cost,mileage:r.mileage}))
+    ].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+
+    const yearlyHtml=yearly.length?`<div class="table-wrap"><table><thead><tr><th>Year</th><th>Recorded Distance</th><th>PMS</th><th>Repairs</th><th>Fuel</th><th>Tires</th><th>Registration / Insurance</th><th>Misc / Upgrades</th><th>Total Cost</th></tr></thead><tbody>${yearly.map(y=>`<tr><td><b style="color:var(--lilac);font-size:1rem">${y.year}</b></td><td class="km">${y.distance!==null&&y.distance>=0?km(y.distance):'—'}</td><td>${money(y.parts.PMS)}</td><td>${money(y.parts.Repairs)}</td><td>${money(y.parts.Fuel)}</td><td>${money(y.parts.Tires)}</td><td>${money(y.parts.Documents)}</td><td>${money(y.parts.Misc)}</td><td class="money">${money(y.total)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">Add dated records to build your yearly report.</div>`;
+
     $('tab-expenses').innerHTML=`<div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Vehicle Expense Dashboard</h3><div class="subtle">Includes PMS, repairs, fuel, tire tracker, registration/insurance and optional upgrades/miscellaneous spending.</div></div><button class="btn btn-primary btn-small" onclick="openExpenseModal()" type="button">＋ Add Misc / Upgrade</button></div>
       <div class="feature-grid"><div class="feature-card"><div class="meta-label">Lifetime Recorded Spend</div><div class="big money">${money(total)}</div></div>${Object.entries(sums).map(([k,v])=>`<div class="feature-card"><div class="meta-label">${k}</div><div class="big">${money(v)}</div><div class="breakdown-bar"><div class="breakdown-fill" style="width:${Math.round(v/max*100)}%"></div></div></div>`).join('')}</div><div class="subtle" style="margin-top:10px">Totals count each record entered. Avoid entering the same tire charge in both Tire Tracker and Parts & Repairs if you do not want it counted twice.</div></div>
-      <div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Miscellaneous / Upgrades</h3><div class="subtle">Optional purchases and upgrades that are not required maintenance.</div></div><button class="btn btn-primary btn-small" onclick="openExpenseModal()" type="button">＋ Add Expense</button></div>${misc.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Mileage</th><th>Shop / Seller</th><th>Cost</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${[...misc].sort((a,b)=>String(b.expense_date).localeCompare(String(a.expense_date))).map(r=>`<tr><td>${niceDate(r.expense_date)}</td><td><span class="badge">${esc(r.category)}</span></td><td><b>${esc(r.description)}</b></td><td class="km">${hasMileage(r.mileage)?km(r.mileage):'—'}</td><td>${esc(r.shop||'—')}</td><td class="money">${money(r.cost)}</td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openExpenseModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteExpense('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No miscellaneous or upgrade expenses yet.</div>`}</div>`;
+      <div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">📊 Yearly Usage / Cost Report</h3><div class="subtle">Annual spending by category. Recorded Distance is estimated from the lowest and highest odometer readings saved during that year.</div></div></div>${yearlyHtml}</div>
+      <div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">🧾 Receipts & Invoices</h3><div class="subtle">Attach JPG, PNG, WebP or PDF proof of payment to PMS, repair and miscellaneous/upgrade records. Multiple attachments are supported.</div></div></div>${receiptRows.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Record</th><th>Mileage</th><th>Cost</th><th>Attachments</th><th>Action</th></tr></thead><tbody>${receiptRows.map(r=>`<tr><td>${niceDate(String(r.date||'').slice(0,10))}</td><td><span class="badge">${r.type==='pms'?'PMS':r.type==='repair'?'Repair':'Expense'}</span></td><td><b>${esc(r.title)}</b></td><td class="km">${hasMileage(r.mileage)?km(r.mileage):'—'}</td><td class="money">${moneyOptional(r.cost)}</td><td>${renderReceiptLinks(r.type,r.id)}</td><td><button class="btn btn-primary btn-small" type="button" onclick="openReceiptModal('${r.type}','${r.id}')">📎 ${receiptsFor(r.type,r.id).length?'Manage':'Add Receipt'}</button></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">Add a PMS, repair, or miscellaneous expense first, then attach its receipt here.</div>`}</div>
+      <div class="panel glass"><div class="panel-title-row"><div><h3 class="panel-title">Miscellaneous / Upgrades</h3><div class="subtle">Optional purchases and upgrades that are not required maintenance.</div></div><button class="btn btn-primary btn-small" onclick="openExpenseModal()" type="button">＋ Add Expense</button></div>${misc.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Mileage</th><th>Shop / Seller</th><th>Cost</th><th>Receipt</th><th>Notes</th><th>Actions</th></tr></thead><tbody>${[...misc].sort((a,b)=>String(b.expense_date).localeCompare(String(a.expense_date))).map(r=>`<tr><td>${niceDate(r.expense_date)}</td><td><span class="badge">${esc(r.category)}</span></td><td><b>${esc(r.description)}</b></td><td class="km">${hasMileage(r.mileage)?km(r.mileage):'—'}</td><td>${esc(r.shop||'—')}</td><td class="money">${money(r.cost)}</td><td>${renderReceiptLinks('expense',r.id)}<div style="margin-top:6px"><button class="btn btn-secondary btn-small" type="button" onclick="openReceiptModal('expense','${r.id}')">📎 ${receiptsFor('expense',r.id).length?'Manage':'Add'}</button></div></td><td class="note">${esc(r.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" onclick="openExpenseModal('${r.id}')" type="button">Edit</button><button class="btn btn-danger btn-small" onclick="deleteExpense('${r.id}')" type="button">Delete</button></div></td></tr>`).join('')}</tbody></table></div>`:`<div class="muted-box">No miscellaneous or upgrade expenses yet.</div>`}</div>`;
   }
 
   function renderFuel(rows,v){
@@ -1046,6 +1137,56 @@
   function openExpenseModal(id=null){clearMsg('expenseMessage');$('expenseForm').reset();$('expenseId').value='';$('expenseDate').value=today();const v=currentVehicle();$('expenseMileage').value=v?.current_mileage??'';$('expenseModalTitle').textContent=id?'Edit Misc / Upgrade Expense':'Add Misc / Upgrade Expense';if(id){const r=state.expenses.find(x=>x.id===id);if(!r)return;$('expenseId').value=r.id;$('expenseDate').value=r.expense_date;$('expenseMileage').value=r.mileage??'';$('expenseCategory').value=r.category;$('expenseDescription').value=r.description;$('expenseCost').value=r.cost??0;$('expenseShop').value=r.shop||'';$('expenseNotes').value=r.notes||'';}openModal('expenseModal')}
   $('expenseForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const id=$('expenseId').value||crypto.randomUUID(),isEdit=!!$('expenseId').value,payload={id,vehicle_id:v.id,expense_date:$('expenseDate').value,mileage:$('expenseMileage').value===''?null:n($('expenseMileage').value),category:$('expenseCategory').value,description:$('expenseDescription').value.trim(),cost:n($('expenseCost').value),shop:$('expenseShop').value.trim()||null,notes:$('expenseNotes').value.trim()||null,updated_at:new Date().toISOString()};const q=isEdit?supabaseClient.from('misc_expenses').update(payload).eq('id',id):supabaseClient.from('misc_expenses').insert(payload);const{error}=await q;if(error)throw error;if(hasMileage(payload.mileage))await bumpMileageIfHigher(v.id,payload.mileage,payload.expense_date,`Mileage from expense: ${payload.description}`);closeModal('expenseModal');toast(isEdit?'Expense updated.':'Expense added.');await loadAll();renderVehicle();}catch(err){showError('expenseMessage',err.message||'Could not save expense.')}finally{setBusy(false)}});
 
+  function receiptRecordName(type,id){
+    const info=expenseRecordInfo(type,id); if(!info)return 'Expense record';
+    const typeName=type==='pms'?'PMS / Service':type==='repair'?'Part / Repair':'Misc / Upgrade';
+    return `${typeName}: ${info.title}`;
+  }
+  function renderReceiptExisting(type,id){
+    const box=$('receiptExisting'); if(!box)return;
+    const rows=receiptsFor(type,id).sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+    box.innerHTML=rows.length?rows.map(r=>`<div class="receipt-existing-row"><div class="file-meta"><div class="file-name">📎 ${esc(r.file_name||'Attachment')}</div>${r.caption?`<div class="subtle">${esc(r.caption)}</div>`:''}</div><div class="table-actions"><a class="btn btn-secondary btn-small" href="${esc(receiptUrl(r.storage_path))}" target="_blank" rel="noopener">View</a><button class="btn btn-danger btn-small" type="button" onclick="deleteReceipt('${r.id}')">Delete</button></div></div>`).join(''):'<div class="subtle">No saved receipt/invoice yet.</div>';
+  }
+  function openReceiptModal(type,id){
+    clearMsg('receiptMessage'); $('receiptForm').reset(); $('receiptRecordType').value=type; $('receiptRecordId').value=id; $('receiptRecordLabel').textContent=receiptRecordName(type,id); renderReceiptExisting(type,id); openModal('receiptModal');
+  }
+  async function uploadReceiptFile(file,vehicleId,type,recordId){
+    const allowed=['image/jpeg','image/png','image/webp','application/pdf'];
+    if(!allowed.includes(file.type))throw new Error(`"${file.name}" must be JPG, PNG, WebP or PDF.`);
+    if(file.size>10*1024*1024)throw new Error(`"${file.name}" must be 10 MB or smaller.`);
+    const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'),path=`${vehicleId}/${type}/${recordId}/${Date.now()}-${crypto.randomUUID()}-${safe}`;
+    const{error}=await supabaseClient.storage.from(RECEIPT_BUCKET).upload(path,file,{upsert:false,contentType:file.type}); if(error)throw error;
+    return {path,name:file.name,mime:file.type};
+  }
+  $('receiptForm').addEventListener('submit',async e=>{
+    e.preventDefault(); const v=currentVehicle(); if(!v)return;
+    const type=$('receiptRecordType').value,id=$('receiptRecordId').value,files=[...$('receiptFiles').files],caption=$('receiptCaption').value.trim()||null;
+    if(!files.length){showError('receiptMessage','Choose at least one receipt or invoice file.');return;}
+    setBusy(true,'Uploading receipt…'); const uploaded=[];
+    try{
+      for(const file of files)uploaded.push(await uploadReceiptFile(file,v.id,type,id));
+      const rows=uploaded.map(up=>({id:crypto.randomUUID(),vehicle_id:v.id,record_type:type,record_id:id,file_name:up.name,storage_path:up.path,mime_type:up.mime,caption,created_at:new Date().toISOString()}));
+      const{error}=await supabaseClient.from('expense_attachments').insert(rows); if(error)throw error;
+      toast(`${uploaded.length} attachment${uploaded.length===1?'':'s'} uploaded.`); await loadAll(); renderVehicle(); openReceiptModal(type,id);
+    }catch(err){
+      if(uploaded.length)await supabaseClient.storage.from(RECEIPT_BUCKET).remove(uploaded.map(x=>x.path));
+      showError('receiptMessage',err.message||'Could not upload receipt. Run the receipt SQL update if this feature is new.');
+    }finally{setBusy(false)}
+  });
+  async function deleteReceipt(id){
+    const r=state.receipts.find(x=>x.id===id); if(!r||!confirm(`Delete "${r.file_name||'this attachment'}"?`))return;
+    setBusy(true,'Deleting…'); try{
+      const{error}=await supabaseClient.from('expense_attachments').delete().eq('id',id); if(error)throw error;
+      if(r.storage_path)await supabaseClient.storage.from(RECEIPT_BUCKET).remove([r.storage_path]);
+      const type=$('receiptRecordType').value,recordId=$('receiptRecordId').value; toast('Attachment deleted.'); await loadAll(); renderVehicle(); if(!$('receiptModal').classList.contains('hidden'))openReceiptModal(type,recordId);
+    }catch(err){toast(err.message||'Delete failed.')}finally{setBusy(false)}
+  }
+  async function deleteReceiptsForRecord(type,id){
+    const rows=state.receipts.filter(x=>x.record_type===type&&x.record_id===id); if(!rows.length)return;
+    const{error}=await supabaseClient.from('expense_attachments').delete().eq('record_type',type).eq('record_id',id); if(error)throw error;
+    const paths=rows.map(x=>x.storage_path).filter(Boolean); if(paths.length)await supabaseClient.storage.from(RECEIPT_BUCKET).remove(paths);
+  }
+
   function syncDocumentExpiryState(){const never=$('documentNeverExpires').checked;$('documentExpiryDate').disabled=never;if(never)$('documentExpiryDate').value='';}
   function openDocumentModal(id=null){clearMsg('documentMessage');$('documentForm').reset();$('documentId').value='';$('existingDocumentPath').value='';$('documentNeverExpires').checked=false;$('documentExpiryDate').disabled=false;$('documentCurrentFile').textContent='No attachment selected.';$('documentModalTitle').textContent=id?'Edit Registration / Insurance':'Add Registration / Insurance';if(id){const r=state.documents.find(x=>x.id===id);if(!r)return;$('documentId').value=r.id;$('existingDocumentPath').value=r.attachment_path||'';$('documentType').value=r.document_type==='Registration'?'Certificate of Registration (CR)':r.document_type;$('documentProvider').value=r.provider||'';$('documentIssueDate').value=r.issue_date||'';$('documentNeverExpires').checked=!!r.never_expires;$('documentExpiryDate').value=r.never_expires?'':(r.expiry_date||'');syncDocumentExpiryState();$('documentReference').value=r.reference_no||'';$('documentCost').value=r.cost??0;$('documentNotes').value=r.notes||'';$('documentCurrentFile').textContent=r.attachment_name?`Current: ${r.attachment_name}`:'No attachment saved.';}openModal('documentModal')}
   $('documentNeverExpires').addEventListener('change',syncDocumentExpiryState);
@@ -1102,8 +1243,8 @@
     const v=state.vehicles.find(x=>x.id===id);if(!v)return;if(!confirm(`Delete ${v.nickname}?\n\nThis will permanently delete its PMS, parts/repair and mileage history.`))return;setBusy(true,'Deleting…');
     try{const galleryPaths=state.photos.filter(x=>x.vehicle_id===id).map(x=>x.storage_path).filter(Boolean);const {error}=await supabaseClient.from('vehicles').delete().eq('id',id);if(error)throw error;const paths=[v.image_path,...galleryPaths].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i);if(paths.length){await supabaseClient.storage.from(IMAGE_BUCKET).remove(paths);}toast('Vehicle deleted.');backToGarage();await loadAll();}catch(e){toast(e.message||'Delete failed.');}finally{setBusy(false)}
   }
-  async function deletePms(id){if(!confirm('Delete this PMS record and its itemized changes?'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('pms_records').delete().eq('id',id);if(error)throw error;toast('PMS deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
-  async function deleteMaintenance(id){if(!confirm('Delete this parts/repair record?'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('maintenance_records').delete().eq('id',id);if(error)throw error;toast('Record deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
+  async function deletePms(id){if(!confirm('Delete this PMS record and its itemized changes?'))return;setBusy(true,'Deleting…');try{await deleteReceiptsForRecord('pms',id);const {error}=await supabaseClient.from('pms_records').delete().eq('id',id);if(error)throw error;toast('PMS deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
+  async function deleteMaintenance(id){if(!confirm('Delete this parts/repair record?'))return;setBusy(true,'Deleting…');try{await deleteReceiptsForRecord('repair',id);const {error}=await supabaseClient.from('maintenance_records').delete().eq('id',id);if(error)throw error;toast('Record deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   async function deleteMileage(id){if(!confirm('Delete this mileage history entry? This will not change the vehicle current mileage.'))return;setBusy(true,'Deleting…');try{const {error}=await supabaseClient.from('mileage_history').delete().eq('id',id);if(error)throw error;toast('Mileage entry deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
 
   async function toggleReminderDone(id){const r=state.reminders.find(x=>x.id===id);if(!r)return;setBusy(true);try{const done=!r.is_done;const{error}=await supabaseClient.from('maintenance_reminders').update({is_done:done,completed_at:done?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq('id',id);if(error)throw error;if(done&&(n(r.repeat_km)>0||n(r.repeat_months)>0)){const v=currentVehicle();const dueMileage=n(r.repeat_km)>0?(hasMileage(v?.current_mileage)?Number(v.current_mileage)+n(r.repeat_km):(hasMileage(r.due_mileage)?Number(r.due_mileage)+n(r.repeat_km):null)):null;const dueDate=n(r.repeat_months)>0?addMonthsToDate(today(),n(r.repeat_months)):null;const{error:ne}=await supabaseClient.from('maintenance_reminders').insert({id:crypto.randomUUID(),vehicle_id:r.vehicle_id,title:r.title,category:r.category,due_date:dueDate,due_mileage:dueMileage,repeat_km:r.repeat_km||null,repeat_months:r.repeat_months||null,notes:r.notes||null,is_done:false});if(ne)throw ne;}toast(done?'Reminder completed. Next reminder created when a repeat interval is set.':'Reminder reopened.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Could not update reminder.')}finally{setBusy(false)}}
@@ -1111,7 +1252,7 @@
   async function deleteSimple(table,id,label){if(!confirm(`Delete this ${label}?\n\nThis cannot be undone.`))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from(table).delete().eq('id',id);if(error)throw error;toast(`${label.charAt(0).toUpperCase()+label.slice(1)} deleted.`);await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   const deleteReminder=id=>deleteSimple('maintenance_reminders',id,'reminder');
   const deleteTireEvent=id=>deleteSimple('tire_events',id,'tire event');
-  const deleteExpense=id=>deleteSimple('misc_expenses',id,'expense');
+  async function deleteExpense(id){if(!confirm('Delete this expense?'))return;setBusy(true,'Deleting…');try{await deleteReceiptsForRecord('expense',id);const{error}=await supabaseClient.from('misc_expenses').delete().eq('id',id);if(error)throw error;toast('Expense deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   const deleteFuel=id=>deleteSimple('fuel_logs',id,'fuel log');
   const deleteShop=id=>deleteSimple('vehicle_shops',id,'shop');
   const deleteIssue=id=>deleteSimple('vehicle_issues',id,'issue');

@@ -246,6 +246,33 @@
       .important-doc-preview,.important-doc-missing{height:220px}.gallery-grid{grid-template-columns:1fr 1fr}.gallery-image{height:165px}.gallery-selection{grid-template-columns:1fr 1fr}
       .timeline-head{display:block}.timeline-date{margin-top:4px}
     }
+
+    /* Carwash Information */
+    .carwash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .carwash-card{border-radius:20px;padding:16px;background:linear-gradient(145deg,rgba(24,16,32,.96),rgba(13,9,18,.96));border:1px solid rgba(103,232,249,.16);box-shadow:0 18px 44px rgba(0,0,0,.22);min-width:0}
+    .carwash-card.favorite{border-color:rgba(103,232,249,.36);box-shadow:0 18px 44px rgba(0,0,0,.22),0 0 26px rgba(103,232,249,.08)}
+    .carwash-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .carwash-name{font-size:1.1rem;font-weight:950;color:#a5f3fc;letter-spacing:-.02em}
+    .carwash-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}
+    .carwash-meta .meta-box{background:rgba(8,6,11,.62)}
+    .carwash-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .carwash-staff{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:7px 10px;border-radius:11px;background:rgba(8,145,178,.13);border:1px solid rgba(103,232,249,.16);color:#cffafe;font-weight:800;font-size:.82rem}
+    .carwash-search{max-width:420px}
+    .carwash-photo-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:12px}
+    .carwash-photo-thumb{position:relative;height:82px;border-radius:12px;overflow:hidden;border:1px solid rgba(196,167,255,.15);background:#0c0911}
+    .carwash-photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:.18s ease}
+    .carwash-photo-thumb:hover img{transform:scale(1.04)}
+    .carwash-photo-more{height:82px;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;color:#e9d5ff;background:linear-gradient(135deg,rgba(124,58,237,.24),rgba(8,145,178,.14));border:1px solid rgba(196,167,255,.18)}
+    .carwash-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+    .carwash-photo-card{border-radius:16px;overflow:hidden;background:#0d0912;border:1px solid rgba(196,167,255,.14)}
+    .carwash-photo-card a{display:block;height:180px;background:#09070d}
+    .carwash-photo-card img{width:100%;height:100%;object-fit:cover;display:block}
+    .carwash-photo-card-body{padding:10px}
+    .carwash-photo-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+    .carwash-photo-selection{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}
+    .carwash-photo-selection img{width:100%;height:92px;object-fit:cover;border-radius:11px;border:1px solid rgba(196,167,255,.14)}
+    @media(max-width:760px){.carwash-grid{grid-template-columns:1fr}.carwash-meta{grid-template-columns:1fr 1fr}.carwash-search{max-width:none}.carwash-photo-grid{grid-template-columns:1fr 1fr}.carwash-photo-selection{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:480px){.carwash-photo-strip{grid-template-columns:repeat(3,minmax(0,1fr))}.carwash-photo-thumb,.carwash-photo-more{height:72px}.carwash-photo-grid{grid-template-columns:1fr 1fr}.carwash-photo-card a{height:150px}}
   </style>
 </head>
 <body>
@@ -260,6 +287,7 @@
       </div>
       <div class="top-actions">
         <button id="homeBtn" class="btn btn-secondary hidden" type="button">← Garage</button>
+        <button id="carwashTop" class="btn btn-secondary" type="button">🚿 Carwash Information</button>
         <button id="addVehicleTop" class="btn btn-primary" type="button">＋ Add Vehicle</button>
       </div>
     </header>
@@ -278,6 +306,32 @@
         <h3 style="margin:0 0 6px;color:#fff">No vehicles yet</h3>
         <div>Add your first vehicle to start tracking mileage, PMS and repairs.</div>
         <button class="btn btn-primary" style="margin-top:15px" type="button" onclick="openVehicleModal()">＋ Add Vehicle</button>
+      </div>
+    </section>
+
+    <section id="carwashView" class="hidden">
+      <div class="section-head">
+        <div>
+          <h1 class="page-title pink-title">🚿 Carwash Information</h1>
+          <div class="subtle">All carwash shops you have tried, the people who handled your vehicles, prices, remarks and visit history.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" type="button" onclick="openCarwashVisitModal()">＋ Log Visit</button>
+          <button class="btn btn-primary" type="button" onclick="openCarwashShopModal()">＋ Add Carwash Shop</button>
+        </div>
+      </div>
+      <div id="carwashStats" class="stats-grid"></div>
+      <div class="panel glass">
+        <div class="panel-title-row">
+          <div><h3 class="panel-title">Saved Carwash Shops</h3><div class="subtle">Search by shop, location, staff/person or remarks.</div></div>
+          <input id="carwashSearch" class="input carwash-search" type="search" placeholder="Search carwash shops…" oninput="renderCarwashPage()">
+        </div>
+        <div id="carwashShopsGrid" class="carwash-grid"></div>
+        <div id="carwashEmpty" class="muted-box hidden">No carwash shops yet. Add one to start your list.</div>
+      </div>
+      <div class="panel glass">
+        <div class="panel-title-row"><div><h3 class="panel-title">Recent Carwash Visits</h3><div class="subtle">A single history across all of your vehicles.</div></div><button class="btn btn-primary btn-small" type="button" onclick="openCarwashVisitModal()">＋ Log Visit</button></div>
+        <div id="carwashVisitsTable"></div>
       </div>
     </section>
 
@@ -559,6 +613,44 @@
     <div class="field full"><label>Notes</label><textarea id="issueNotes" class="input" maxlength="1200" placeholder="Symptoms, what to watch, temporary fix, etc."></textarea></div>
   </div><div id="issueMessage" class="message"></div><div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('issueModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Issue</button></div></form></div></div>
 
+  <!-- Carwash Shop modal -->
+  <div id="carwashShopModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><h2 id="carwashShopModalTitle" class="modal-title">Add Carwash Shop</h2><button class="close-btn" type="button" onclick="closeModal('carwashShopModal')">×</button></div><form id="carwashShopForm"><input id="carwashShopId" type="hidden"><div class="form-grid">
+    <div class="field"><label>Carwash Shop Name</label><input id="carwashShopName" class="input" maxlength="140" placeholder="e.g. Aqua Clean Carwash"></div>
+    <div class="field"><label>Preferred Carwash Person / Staff</label><input id="carwashPreferredStaff" class="input" maxlength="120" placeholder="Optional"></div>
+    <div class="field full"><label>Address / Location</label><input id="carwashLocation" class="input" maxlength="260" placeholder="Optional"></div>
+    <div class="field full"><label>Google Maps URL</label><input id="carwashMapsUrl" class="input" type="url" maxlength="600" placeholder="Optional"></div>
+    <div class="field"><label>Phone / Contact</label><input id="carwashContact" class="input" maxlength="100" placeholder="Optional"></div>
+    <div class="field"><label>Usual Price</label><input id="carwashUsualPrice" class="input" type="number" min="0" step="0.01" placeholder="Optional"></div>
+    <div class="field"><label>Payment Method</label><select id="carwashPayment" class="input"><option value="">Not set</option><option>Cash</option><option>Card</option><option>GCash</option><option>Maya</option><option>QRPH</option><option>Cash / QR</option><option>Other</option></select></div>
+    <div class="field"><label>Favorite?</label><select id="carwashFavorite" class="input"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="field full"><label>Services / Packages</label><input id="carwashServices" class="input" maxlength="400" placeholder="e.g. Basic wash, vacuum, wax, underwash"></div>
+    <div class="field full"><label>Remarks / Notes About This Shop</label><textarea id="carwashRemarks" class="input" maxlength="1600" placeholder="e.g. Ask for Carlo, careful with ceramic coating, usually busy on weekends"></textarea></div>
+  </div><div id="carwashShopMessage" class="message"></div><div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('carwashShopModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Carwash Shop</button></div></form></div></div>
+
+  <!-- Carwash Shop Photos modal -->
+  <div id="carwashPhotosModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><div><h2 id="carwashPhotosTitle" class="modal-title">Carwash Photos</h2><div class="subtle">Price boards, service menus, shop photos and other references.</div></div><button class="close-btn" type="button" onclick="closeModal('carwashPhotosModal')">×</button></div>
+    <form id="carwashPhotosForm"><input id="carwashPhotosShopId" type="hidden"><div class="form-grid">
+      <div class="field full"><label>Add Multiple Photos</label><input id="carwashPhotoFiles" class="input" type="file" multiple accept="image/jpeg,image/png,image/webp"><div class="subtle">Select up to 20 images at once. Photos are compressed before upload.</div><div id="carwashPhotoSelection" class="carwash-photo-selection"></div></div>
+      <div class="field full"><label>Caption / Note</label><input id="carwashPhotoCaption" class="input" maxlength="200" placeholder="e.g. 2026 price board, detailing packages"></div>
+    </div><div id="carwashPhotosMessage" class="message"></div><div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('carwashPhotosModal')">Close</button><button class="btn btn-primary" type="submit">Upload Photos</button></div></form>
+    <div style="height:1px;background:rgba(196,167,255,.12);margin:18px 0"></div>
+    <div><h3 class="panel-title">Saved Photos</h3><div id="carwashPhotosGallery"></div></div>
+  </div></div>
+
+  <!-- Carwash Visit modal -->
+  <div id="carwashVisitModal" class="modal hidden"><div class="modal-card glass"><div class="modal-head"><h2 id="carwashVisitModalTitle" class="modal-title">Log Carwash Visit</h2><button class="close-btn" type="button" onclick="closeModal('carwashVisitModal')">×</button></div><form id="carwashVisitForm"><input id="carwashVisitId" type="hidden"><div class="form-grid">
+    <div class="field"><label>Carwash Shop</label><select id="carwashVisitShop" class="input"><option value="">Select shop</option></select></div>
+    <div class="field"><label>Vehicle</label><select id="carwashVisitVehicle" class="input"><option value="">Not specified</option></select></div>
+    <div class="field"><label>Date</label><input id="carwashVisitDate" class="input" type="date"></div>
+    <div class="field"><label>Mileage</label><input id="carwashVisitMileage" class="input" type="number" min="0" step="0.1" placeholder="Optional"></div>
+    <div class="field"><label>Service / Package</label><input id="carwashVisitService" class="input" maxlength="200" placeholder="e.g. Wash + vacuum"></div>
+    <div class="field"><label>Carwash Person / Staff</label><input id="carwashVisitStaff" class="input" maxlength="120" placeholder="Optional"></div>
+    <div class="field"><label>Amount Paid</label><input id="carwashVisitAmount" class="input" type="number" min="0" step="0.01" placeholder="Optional"></div>
+    <div class="field"><label>Payment Method</label><select id="carwashVisitPayment" class="input"><option value="">Not set</option><option>Cash</option><option>Card</option><option>GCash</option><option>Maya</option><option>QRPH</option><option>Cash / QR</option><option>Other</option></select></div>
+    <div class="field"><label>Rating (1–10)</label><input id="carwashVisitRating" class="input" type="number" min="1" max="10" step="0.5" placeholder="Optional"></div>
+    <div class="field full"><label>Visit Remarks</label><textarea id="carwashVisitNotes" class="input" maxlength="1200" placeholder="e.g. Good interior cleaning, waited 40 minutes"></textarea></div>
+  </div><div id="carwashVisitMessage" class="message"></div><div class="form-actions"><button class="btn btn-secondary" type="button" onclick="closeModal('carwashVisitModal')">Cancel</button><button class="btn btn-primary" type="submit">Save Visit</button></div></form></div></div>
+
   <datalist id="shopList"></datalist>
 
   <div id="loading" class="loading hidden">Saving…</div>
@@ -571,8 +663,9 @@
   const IMAGE_BUCKET = "vehicle-images";
   const DOC_BUCKET = "vehicle-documents";
   const RECEIPT_BUCKET = "expense-receipts";
+  const CARWASH_PHOTO_BUCKET = "carwash-photos";
 
-  const state = { vehicles:[], pms:[], pmsItems:[], maintenance:[], mileage:[], reminders:[], tires:[], tireEvents:[], fuelLogs:[], photos:[], expenses:[], receipts:[], documents:[], shops:[], issues:[], currentVehicleId:null, activeTab:"overview" };
+  const state = { vehicles:[], pms:[], pmsItems:[], maintenance:[], mileage:[], reminders:[], tires:[], tireEvents:[], fuelLogs:[], photos:[], expenses:[], receipts:[], documents:[], shops:[], issues:[], carwashShops:[], carwashVisits:[], carwashPhotos:[], currentVehicleId:null, activeTab:"overview", carwashOpen:false };
   const $ = id => document.getElementById(id);
   const esc = v => String(v ?? "").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const n = v => Number(v || 0);
@@ -610,6 +703,8 @@
   function docUrl(path){ if(!path)return ''; return supabaseClient.storage.from(DOC_BUCKET).getPublicUrl(path).data.publicUrl; }
   function receiptUrl(path){ if(!path)return ''; return supabaseClient.storage.from(RECEIPT_BUCKET).getPublicUrl(path).data.publicUrl; }
   function receiptsFor(recordType,recordId){ return state.receipts.filter(x=>x.record_type===recordType && x.record_id===recordId); }
+  function carwashPhotoUrl(path){ if(!path)return ''; return supabaseClient.storage.from(CARWASH_PHOTO_BUCKET).getPublicUrl(path).data.publicUrl; }
+  function carwashPhotosFor(shopId){ return state.carwashPhotos.filter(x=>x.carwash_shop_id===shopId).sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))); }
   function normalizeName(v){ return String(v||'').trim().toLowerCase(); }
   function daysUntil(date){ if(!date)return null; const a=new Date(today()+'T00:00:00'),b=new Date(date+'T00:00:00'); return Math.ceil((b-a)/86400000); }
   function fuelEconomyData(logs){
@@ -665,7 +760,7 @@
   async function loadAll(){
     setBusy(true,'Loading…');
     try{
-      const [vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,ar,dr,sr,xr]=await Promise.all([
+      const [vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,ar,dr,sr,xr,cwsr,cwvr,cwpr]=await Promise.all([
         supabaseClient.from('vehicles').select('*').order('created_at',{ascending:true}),
         supabaseClient.from('pms_records').select('*').order('service_date',{ascending:false}),
         supabaseClient.from('pms_items').select('*').order('created_at',{ascending:true}),
@@ -680,14 +775,82 @@
         optionalSelect('expense_attachments','created_at',false),
         supabaseClient.from('vehicle_documents').select('*').order('created_at',{ascending:false}),
         supabaseClient.from('vehicle_shops').select('*').order('name',{ascending:true}),
-        supabaseClient.from('vehicle_issues').select('*').order('reported_date',{ascending:false})
+        supabaseClient.from('vehicle_issues').select('*').order('reported_date',{ascending:false}),
+        optionalSelect('carwash_shops','created_at',true),
+        optionalSelect('carwash_visits','created_at',false),
+        optionalSelect('carwash_photos','created_at',false)
       ]);
-      const all=[vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,ar,dr,sr,xr], bad=all.find(x=>x.error); if(bad)throw bad.error;
+      const all=[vr,pr,ir,mr,hr,rr,tr,ter,fr,phr,er,ar,dr,sr,xr,cwsr,cwvr,cwpr], bad=all.find(x=>x.error); if(bad)throw bad.error;
       state.vehicles=vr.data||[]; state.pms=pr.data||[]; state.pmsItems=ir.data||[]; state.maintenance=mr.data||[]; state.mileage=hr.data||[];
-      state.reminders=rr.data||[]; state.tires=tr.data||[]; state.tireEvents=ter.data||[]; state.fuelLogs=fr.data||[]; state.photos=phr.data||[]; state.expenses=er.data||[]; state.receipts=ar.data||[]; state.documents=dr.data||[]; state.shops=sr.data||[]; state.issues=xr.data||[];
-      renderGarage(); if(state.currentVehicleId && state.vehicles.some(v=>v.id===state.currentVehicleId)) renderVehicle();
+      state.reminders=rr.data||[]; state.tires=tr.data||[]; state.tireEvents=ter.data||[]; state.fuelLogs=fr.data||[]; state.photos=phr.data||[]; state.expenses=er.data||[]; state.receipts=ar.data||[]; state.documents=dr.data||[]; state.shops=sr.data||[]; state.issues=xr.data||[]; state.carwashShops=cwsr.data||[]; state.carwashVisits=cwvr.data||[]; state.carwashPhotos=cwpr.data||[];
+      renderGarage(); if(state.carwashOpen) renderCarwashPage(); if(state.currentVehicleId && state.vehicles.some(v=>v.id===state.currentVehicleId)) renderVehicle();
     }catch(e){ console.error(e); toast('Database needs the latest SQL update. Run feature_update.sql in Supabase.'); }
     finally{setBusy(false)}
+  }
+
+  function carwashShopById(id){ return state.carwashShops.find(x=>x.id===id); }
+  function carwashVehicleLabel(id){ const v=state.vehicles.find(x=>x.id===id); return v ? (v.nickname || `${v.brand||''} ${v.model||''}`.trim() || 'Vehicle') : '—'; }
+  function carwashVisitSort(a,b){ const ad=a.visit_date||a.created_at||'',bd=b.visit_date||b.created_at||''; return String(bd).localeCompare(String(ad)); }
+  function renderCarwashPage(){
+    const search=String($('carwashSearch')?.value||'').trim().toLowerCase();
+    const shops=[...state.carwashShops].sort((a,b)=>Number(b.favorite||false)-Number(a.favorite||false)||String(a.name||'').localeCompare(String(b.name||'')));
+    const visits=[...state.carwashVisits].sort(carwashVisitSort);
+    const totalSpend=visits.reduce((sum,x)=>sum+n(x.amount),0);
+    const rated=visits.filter(x=>x.rating!==null&&x.rating!==undefined&&String(x.rating).trim()!=='');
+    const avgRating=rated.length?rated.reduce((sum,x)=>sum+Number(x.rating),0)/rated.length:null;
+    $('carwashStats').innerHTML=`<div class="stat glass"><div class="meta-label">Carwash Shops</div><div class="stat-value">${shops.length}</div></div><div class="stat glass"><div class="meta-label">Recorded Visits</div><div class="stat-value">${visits.length}</div></div><div class="stat glass"><div class="meta-label">Carwash Spend</div><div class="stat-value money">${money(totalSpend)}</div></div><div class="stat glass"><div class="meta-label">Average Rating</div><div class="stat-value stat-cyan">${avgRating?avgRating.toFixed(1)+' / 10':'—'}</div></div>`;
+    const filtered=shops.filter(shop=>{if(!search)return true;return [shop.name,shop.location,shop.preferred_staff,shop.services,shop.remarks,shop.contact].some(v=>String(v||'').toLowerCase().includes(search));});
+    $('carwashEmpty').classList.toggle('hidden',filtered.length>0);
+    $('carwashShopsGrid').innerHTML=filtered.map(shop=>{
+      const sv=visits.filter(v=>v.carwash_shop_id===shop.id),last=sv[0]||null,spend=sv.reduce((sum,x)=>sum+n(x.amount),0),ratedRows=sv.filter(x=>x.rating!==null&&x.rating!==undefined&&String(x.rating).trim()!==''),rating=ratedRows.length?ratedRows.reduce((sum,x)=>sum+Number(x.rating),0)/ratedRows.length:null;
+      const shopPhotos=carwashPhotosFor(shop.id),preview=shopPhotos.slice(0,3),photoStrip=shopPhotos.length?`<div class="carwash-photo-strip">${preview.map(p=>`<a class="carwash-photo-thumb" href="${esc(carwashPhotoUrl(p.storage_path))}" target="_blank" rel="noopener"><img src="${esc(carwashPhotoUrl(p.storage_path))}" alt="${esc(p.caption||shop.name||'Carwash photo')}"></a>`).join('')}${shopPhotos.length>3?`<button class="carwash-photo-more" type="button" onclick="openCarwashPhotosModal('${shop.id}')">+${shopPhotos.length-3}<br>more</button>`:''}</div>`:'';
+      return `<article class="carwash-card ${shop.favorite?'favorite':''}"><div class="carwash-card-head"><div><div class="carwash-name">🚿 ${esc(shop.name||'Unnamed Carwash')}</div><div class="subtle" style="margin-top:4px">${esc(shop.location||'Location not set')}</div></div>${shop.favorite?'<span class="badge status-good">★ Favorite</span>':''}</div>${shop.preferred_staff?`<div class="carwash-staff">👤 Preferred: ${esc(shop.preferred_staff)}</div>`:''}${shop.services?`<div class="subtle" style="margin-top:10px"><b style="color:#ede9fe">Services:</b> ${esc(shop.services)}</div>`:''}${photoStrip}<div class="carwash-meta"><div class="meta-box"><div class="meta-label">Visits</div><div class="meta-value">${sv.length}</div></div><div class="meta-box"><div class="meta-label">Last Visit</div><div class="meta-value">${last?niceDate(last.visit_date):'—'}</div></div><div class="meta-box"><div class="meta-label">Spent</div><div class="meta-value money">${money(spend)}</div></div><div class="meta-box"><div class="meta-label">Usual Price</div><div class="meta-value">${moneyOptional(shop.usual_price)}</div></div><div class="meta-box"><div class="meta-label">Payment</div><div class="meta-value">${esc(shop.payment_method||'—')}</div></div><div class="meta-box"><div class="meta-label">Rating</div><div class="meta-value stat-cyan">${rating?rating.toFixed(1)+'/10':'—'}</div></div></div>${shop.contact?`<div class="subtle" style="margin-top:10px">☎️ ${esc(shop.contact)}</div>`:''}${shop.remarks?`<div class="muted-box" style="margin-top:10px">${esc(shop.remarks)}</div>`:''}<div class="carwash-actions">${shop.google_maps_url?`<a class="btn btn-secondary btn-small" href="${esc(shop.google_maps_url)}" target="_blank" rel="noopener">🗺️ Maps</a>`:''}<button class="btn btn-secondary btn-small" type="button" onclick="openCarwashPhotosModal('${shop.id}')">📸 Photos (${shopPhotos.length})</button><button class="btn btn-primary btn-small" type="button" onclick="openCarwashVisitModal('${shop.id}')">＋ Log Visit</button><button class="btn btn-secondary btn-small" type="button" onclick="openCarwashShopModal('${shop.id}')">Edit</button><button class="btn btn-danger btn-small" type="button" onclick="deleteCarwashShop('${shop.id}')">Delete</button></div></article>`;
+    }).join('');
+    $('carwashVisitsTable').innerHTML=visits.length?`<div class="table-wrap"><table><thead><tr><th>Date</th><th>Vehicle</th><th>Carwash</th><th>Service</th><th>Staff</th><th>Mileage</th><th>Paid</th><th>Rating</th><th>Remarks</th><th>Actions</th></tr></thead><tbody>${visits.map(v=>{const shop=carwashShopById(v.carwash_shop_id);return `<tr><td>${niceDate(v.visit_date)}</td><td><b>${esc(carwashVehicleLabel(v.vehicle_id))}</b></td><td>${esc(shop?.name||'Deleted shop')}</td><td>${esc(v.service||'—')}</td><td>${esc(v.attendant||'—')}</td><td class="km">${hasMileage(v.mileage)?km(v.mileage):'—'}</td><td class="money">${moneyOptional(v.amount)}</td><td>${v.rating?`${fmtNumber(v.rating,1)}/10`:'—'}</td><td class="note">${esc(v.notes||'—')}</td><td><div class="table-actions"><button class="btn btn-secondary btn-small" type="button" onclick="openCarwashVisitModal(null,'${v.id}')">Edit</button><button class="btn btn-danger btn-small" type="button" onclick="deleteCarwashVisit('${v.id}')">Delete</button></div></td></tr>`}).join('')}</tbody></table></div>`:'<div class="muted-box">No carwash visits recorded yet.</div>';
+  }
+
+  function openCarwashView(options={}){
+    state.currentVehicleId=null; state.carwashOpen=true;
+    $('garageView').classList.add('hidden'); $('vehicleView').classList.add('hidden'); $('carwashView').classList.remove('hidden');
+    $('homeBtn').classList.remove('hidden'); $('addVehicleTop').classList.add('hidden'); $('carwashTop').classList.add('hidden');
+    if(!options.fromHistory) history.pushState({pmsView:'carwash'},'',location.href);
+    renderCarwashPage(); window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function fillCarwashVisitSelects(){
+    $('carwashVisitShop').innerHTML='<option value="">Select shop</option>'+state.carwashShops.map(s=>`<option value="${s.id}">${esc(s.name||'Unnamed Carwash')}</option>`).join('');
+    $('carwashVisitVehicle').innerHTML='<option value="">Not specified</option>'+state.vehicles.map(v=>`<option value="${v.id}">${esc(v.nickname||`${v.brand||''} ${v.model||''}`.trim()||'Vehicle')}</option>`).join('');
+  }
+  function applyCarwashShopDefaults(){ const shop=carwashShopById($('carwashVisitShop').value); if(!shop)return; if(!$('carwashVisitStaff').value)$('carwashVisitStaff').value=shop.preferred_staff||''; if(!$('carwashVisitService').value)$('carwashVisitService').value=shop.services||''; if(!$('carwashVisitAmount').value && shop.usual_price!==null && shop.usual_price!==undefined)$('carwashVisitAmount').value=shop.usual_price; if(!$('carwashVisitPayment').value)$('carwashVisitPayment').value=shop.payment_method||''; }
+  function openCarwashShopModal(id=null){ clearMsg('carwashShopMessage'); $('carwashShopForm').reset(); $('carwashShopId').value=''; $('carwashShopModalTitle').textContent=id?'Edit Carwash Shop':'Add Carwash Shop'; if(id){const r=carwashShopById(id);if(!r)return;$('carwashShopId').value=r.id;$('carwashShopName').value=r.name||'';$('carwashPreferredStaff').value=r.preferred_staff||'';$('carwashLocation').value=r.location||'';$('carwashMapsUrl').value=r.google_maps_url||'';$('carwashContact').value=r.contact||'';$('carwashUsualPrice').value=r.usual_price??'';$('carwashPayment').value=r.payment_method||'';$('carwashFavorite').value=String(!!r.favorite);$('carwashServices').value=r.services||'';$('carwashRemarks').value=r.remarks||'';} openModal('carwashShopModal'); }
+  function openCarwashVisitModal(shopId=null,visitId=null){ clearMsg('carwashVisitMessage'); $('carwashVisitForm').reset(); $('carwashVisitId').value=''; fillCarwashVisitSelects(); $('carwashVisitModalTitle').textContent=visitId?'Edit Carwash Visit':'Log Carwash Visit'; if(visitId){const r=state.carwashVisits.find(x=>x.id===visitId);if(!r)return;$('carwashVisitId').value=r.id;$('carwashVisitShop').value=r.carwash_shop_id||'';$('carwashVisitVehicle').value=r.vehicle_id||'';$('carwashVisitDate').value=r.visit_date||'';$('carwashVisitMileage').value=r.mileage??'';$('carwashVisitService').value=r.service||'';$('carwashVisitStaff').value=r.attendant||'';$('carwashVisitAmount').value=r.amount??'';$('carwashVisitPayment').value=r.payment_method||'';$('carwashVisitRating').value=r.rating??'';$('carwashVisitNotes').value=r.notes||'';}else if(shopId){$('carwashVisitShop').value=shopId;applyCarwashShopDefaults();} openModal('carwashVisitModal'); }
+
+  function renderCarwashPhotosGallery(shopId){
+    const photos=carwashPhotosFor(shopId),box=$('carwashPhotosGallery'); if(!box)return;
+    box.innerHTML=photos.length?`<div class="carwash-photo-grid">${photos.map(p=>{const u=carwashPhotoUrl(p.storage_path);return `<article class="carwash-photo-card"><a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="${esc(p.caption||p.file_name||'Carwash photo')}"></a><div class="carwash-photo-card-body"><div style="font-weight:850">${esc(p.caption||'Carwash photo')}</div><div class="subtle" style="margin-top:3px">${esc(p.file_name||'Image')}</div><div class="carwash-photo-actions"><a class="btn btn-secondary btn-small" href="${esc(u)}" target="_blank" rel="noopener">👁 View</a><button class="btn btn-danger btn-small" type="button" onclick="deleteCarwashPhoto('${p.id}')">Delete</button></div></div></article>`}).join('')}</div>`:'<div class="muted-box">No photos saved yet. Add price boards, service menus or shop photos above.</div>';
+  }
+  function openCarwashPhotosModal(shopId){
+    const shop=carwashShopById(shopId); if(!shop)return; clearMsg('carwashPhotosMessage'); $('carwashPhotosForm').reset(); $('carwashPhotosShopId').value=shopId; $('carwashPhotosTitle').textContent=`📸 ${shop.name||'Carwash'} Photos`; $('carwashPhotoSelection').innerHTML=''; renderCarwashPhotosGallery(shopId); openModal('carwashPhotosModal');
+  }
+  $('carwashPhotoFiles').addEventListener('change',()=>{const files=[...$('carwashPhotoFiles').files];$('carwashPhotoSelection').innerHTML='';files.slice(0,20).forEach(f=>{const img=document.createElement('img');img.src=URL.createObjectURL(f);img.alt=f.name;$('carwashPhotoSelection').appendChild(img);});});
+  async function uploadCarwashPhoto(file,shopId,index){
+    if(!file.type.startsWith('image/'))throw new Error(`"${file.name}" is not an image.`);
+    if(file.size>10*1024*1024)throw new Error(`"${file.name}" is larger than 10 MB.`);
+    const processed=await compressImage(file),ext=(processed.name.split('.').pop()||'jpg').toLowerCase(),path=`${shopId}/${Date.now()}-${index}-${crypto.randomUUID().slice(0,8)}.${ext}`;
+    const{error}=await supabaseClient.storage.from(CARWASH_PHOTO_BUCKET).upload(path,processed,{cacheControl:'3600',upsert:false,contentType:processed.type}); if(error)throw error; return {path,fileName:file.name};
+  }
+  $('carwashPhotosForm').addEventListener('submit',async e=>{
+    e.preventDefault(); const shopId=$('carwashPhotosShopId').value,files=[...$('carwashPhotoFiles').files]; if(!shopId)return;
+    if(!files.length){showError('carwashPhotosMessage','Choose at least one photo.');return;} if(files.length>20){showError('carwashPhotosMessage','Upload up to 20 photos at a time.');return;}
+    setBusy(true,'Uploading carwash photos…'); const uploaded=[];
+    try{const caption=$('carwashPhotoCaption').value.trim()||null,rows=[];for(let i=0;i<files.length;i++){const up=await uploadCarwashPhoto(files[i],shopId,i+1);uploaded.push(up.path);rows.push({id:crypto.randomUUID(),carwash_shop_id:shopId,storage_path:up.path,file_name:up.fileName,caption});}const{error}=await supabaseClient.from('carwash_photos').insert(rows);if(error)throw error;toast(`${rows.length} carwash photo${rows.length===1?'':'s'} uploaded.`);await loadAll();$('carwashPhotoFiles').value='';$('carwashPhotoCaption').value='';$('carwashPhotoSelection').innerHTML='';renderCarwashPhotosGallery(shopId);renderCarwashPage();}
+    catch(err){if(uploaded.length)await supabaseClient.storage.from(CARWASH_PHOTO_BUCKET).remove(uploaded);showError('carwashPhotosMessage',err.message||'Could not upload carwash photos. Run the latest Carwash Photos SQL update.');}
+    finally{setBusy(false);}
+  });
+  async function deleteCarwashPhoto(id){
+    const r=state.carwashPhotos.find(x=>x.id===id); if(!r||!confirm('Delete this carwash photo?'))return; setBusy(true,'Deleting photo…');
+    try{const{error}=await supabaseClient.from('carwash_photos').delete().eq('id',id);if(error)throw error;await supabaseClient.storage.from(CARWASH_PHOTO_BUCKET).remove([r.storage_path]);toast('Carwash photo deleted.');await loadAll();renderCarwashPhotosGallery(r.carwash_shop_id);renderCarwashPage();}
+    catch(err){toast(err.message||'Could not delete carwash photo.');}finally{setBusy(false);}
   }
 
   function renderGarage(){
@@ -717,8 +880,8 @@
   }
 
   function openVehicle(id, options={}){
-    state.currentVehicleId=id; state.activeTab='overview';
-    $('garageView').classList.add('hidden'); $('vehicleView').classList.remove('hidden'); $('homeBtn').classList.remove('hidden'); $('addVehicleTop').classList.add('hidden');
+    state.currentVehicleId=id; state.activeTab='overview'; state.carwashOpen=false;
+    $('garageView').classList.add('hidden'); $('carwashView').classList.add('hidden'); $('vehicleView').classList.remove('hidden'); $('homeBtn').classList.remove('hidden'); $('addVehicleTop').classList.add('hidden'); $('carwashTop').classList.add('hidden');
     document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='overview'));
 
     // Create a browser/WebView history entry so Android's Back button/gesture
@@ -731,11 +894,12 @@
   }
 
   function showGarageView(){
-    state.currentVehicleId=null;
+    state.currentVehicleId=null; state.carwashOpen=false;
     $('vehicleView').classList.add('hidden');
+    $('carwashView').classList.add('hidden');
     $('garageView').classList.remove('hidden');
     $('homeBtn').classList.add('hidden');
-    $('addVehicleTop').classList.remove('hidden');
+    $('addVehicleTop').classList.remove('hidden'); $('carwashTop').classList.remove('hidden');
     renderGarage();
     window.scrollTo({top:0,behavior:'smooth'});
   }
@@ -743,7 +907,7 @@
   function backToGarage(){
     // When a vehicle was opened normally, step back through browser/WebView
     // history. The popstate handler below then restores the Garage view.
-    if(history.state?.pmsView==='vehicle'){
+    if(history.state?.pmsView==='vehicle' || history.state?.pmsView==='carwash'){
       history.back();
       return;
     }
@@ -1216,6 +1380,10 @@
   async function deleteGalleryPhoto(id){const r=state.photos.find(x=>x.id===id),v=currentVehicle();if(!r||!v||!confirm('Delete this gallery photo?'))return;setBusy(true,'Deleting…');try{if(v.image_path===r.storage_path){const{error:ve}=await supabaseClient.from('vehicles').update({image_path:null,updated_at:new Date().toISOString()}).eq('id',v.id);if(ve)throw ve;}const{error}=await supabaseClient.from('vehicle_photos').delete().eq('id',id);if(error)throw error;await supabaseClient.storage.from(IMAGE_BUCKET).remove([r.storage_path]);toast('Photo deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Could not delete photo.')}finally{setBusy(false)}}
 
   function openMileageModal(){const v=currentVehicle();if(!v)return;clearMsg('mileageMessage');$('mileageForm').reset();$('mileageDate').value=today();$('mileageValue').value=v.current_mileage??'';openModal('mileageModal');}
+  $('carwashVisitShop').addEventListener('change',applyCarwashShopDefaults);
+  $('carwashShopForm').addEventListener('submit',async e=>{e.preventDefault();setBusy(true);try{const id=$('carwashShopId').value||crypto.randomUUID(),isEdit=!!$('carwashShopId').value,payload={id,name:$('carwashShopName').value.trim()||'Unnamed Carwash',preferred_staff:$('carwashPreferredStaff').value.trim()||null,location:$('carwashLocation').value.trim()||null,google_maps_url:$('carwashMapsUrl').value.trim()||null,contact:$('carwashContact').value.trim()||null,usual_price:optionalNumber($('carwashUsualPrice').value),payment_method:$('carwashPayment').value||null,favorite:$('carwashFavorite').value==='true',services:$('carwashServices').value.trim()||null,remarks:$('carwashRemarks').value.trim()||null,updated_at:new Date().toISOString()};const q=isEdit?supabaseClient.from('carwash_shops').update(payload).eq('id',id):supabaseClient.from('carwash_shops').insert(payload);const{error}=await q;if(error)throw error;closeModal('carwashShopModal');toast(isEdit?'Carwash shop updated.':'Carwash shop added.');await loadAll();renderCarwashPage();}catch(err){showError('carwashShopMessage',err.message||'Could not save carwash shop. Run the Carwash SQL update first.')}finally{setBusy(false)}});
+  $('carwashVisitForm').addEventListener('submit',async e=>{e.preventDefault();setBusy(true);try{const id=$('carwashVisitId').value||crypto.randomUUID(),isEdit=!!$('carwashVisitId').value,payload={id,carwash_shop_id:$('carwashVisitShop').value||null,vehicle_id:$('carwashVisitVehicle').value||null,visit_date:$('carwashVisitDate').value||null,mileage:optionalNumber($('carwashVisitMileage').value),service:$('carwashVisitService').value.trim()||null,attendant:$('carwashVisitStaff').value.trim()||null,amount:optionalNumber($('carwashVisitAmount').value),payment_method:$('carwashVisitPayment').value||null,rating:optionalNumber($('carwashVisitRating').value),notes:$('carwashVisitNotes').value.trim()||null,updated_at:new Date().toISOString()};if(!payload.carwash_shop_id)throw new Error('Select a carwash shop first.');const q=isEdit?supabaseClient.from('carwash_visits').update(payload).eq('id',id):supabaseClient.from('carwash_visits').insert(payload);const{error}=await q;if(error)throw error;if(payload.vehicle_id&&hasMileage(payload.mileage))await bumpMileageIfHigher(payload.vehicle_id,payload.mileage,payload.visit_date,'Mileage from carwash visit');closeModal('carwashVisitModal');toast(isEdit?'Carwash visit updated.':'Carwash visit logged.');await loadAll();renderCarwashPage();}catch(err){showError('carwashVisitMessage',err.message||'Could not save carwash visit. Run the Carwash SQL update first.')}finally{setBusy(false)}});
+
   $('mileageForm').addEventListener('submit',async e=>{e.preventDefault();const v=currentVehicle();if(!v)return;setBusy(true);try{const reading=n($('mileageValue').value),date=$('mileageDate').value;const {error}=await supabaseClient.from('vehicles').update({current_mileage:reading,updated_at:new Date().toISOString()}).eq('id',v.id);if(error)throw error;await addMileageHistory(v.id,date,reading,$('mileageNotes').value.trim()||'Manual mileage update');closeModal('mileageModal');toast('Mileage updated.');await loadAll();renderVehicle();}catch(err){showError('mileageMessage',err.message||'Could not update mileage.');}finally{setBusy(false)}});
 
   async function addMileageHistory(vehicleId,date,mileage,notes){const {error}=await supabaseClient.from('mileage_history').insert({vehicle_id:vehicleId,reading_date:date,mileage,notes});if(error)throw error;}
@@ -1255,6 +1423,8 @@
   async function deleteExpense(id){if(!confirm('Delete this expense?'))return;setBusy(true,'Deleting…');try{await deleteReceiptsForRecord('expense',id);const{error}=await supabaseClient.from('misc_expenses').delete().eq('id',id);if(error)throw error;toast('Expense deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   const deleteFuel=id=>deleteSimple('fuel_logs',id,'fuel log');
   const deleteShop=id=>deleteSimple('vehicle_shops',id,'shop');
+  async function deleteCarwashVisit(id){if(!confirm('Delete this carwash visit?'))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from('carwash_visits').delete().eq('id',id);if(error)throw error;toast('Carwash visit deleted.');await loadAll();renderCarwashPage();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
+  async function deleteCarwashShop(id){const shop=carwashShopById(id);if(!shop)return;if(!confirm(`Delete ${shop.name||'this carwash shop'}?\n\nIts recorded carwash visits and saved photos will also be deleted.`))return;setBusy(true,'Deleting…');try{const photos=carwashPhotosFor(id);if(photos.length)await supabaseClient.storage.from(CARWASH_PHOTO_BUCKET).remove(photos.map(x=>x.storage_path));const{error}=await supabaseClient.from('carwash_shops').delete().eq('id',id);if(error)throw error;toast('Carwash shop deleted.');await loadAll();renderCarwashPage();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   const deleteIssue=id=>deleteSimple('vehicle_issues',id,'issue');
   async function deleteTire(id){if(!confirm('Delete this tire and all of its patch/repair events?\n\nThis cannot be undone.'))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from('tires').delete().eq('id',id);if(error)throw error;toast('Tire deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
   async function deleteDocument(id){const r=state.documents.find(x=>x.id===id);if(!r||!confirm('Delete this registration / insurance record and its attachment?\n\nThis cannot be undone.'))return;setBusy(true,'Deleting…');try{const{error}=await supabaseClient.from('vehicle_documents').delete().eq('id',id);if(error)throw error;if(r.attachment_path)await supabaseClient.storage.from(DOC_BUCKET).remove([r.attachment_path]);toast('Document deleted.');await loadAll();renderVehicle();}catch(e){toast(e.message||'Delete failed.')}finally{setBusy(false)}}
@@ -1266,12 +1436,12 @@
   }
 
   window.addEventListener('popstate',()=>{
-    if(state.currentVehicleId){
+    if(state.currentVehicleId || state.carwashOpen){
       showGarageView();
     }
   });
 
-  $('homeBtn').onclick=backToGarage;$('addVehicleTop').onclick=()=>openVehicleModal();document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
+  $('homeBtn').onclick=backToGarage;$('carwashTop').onclick=()=>openCarwashView();$('addVehicleTop').onclick=()=>openVehicleModal();document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showTab(t.dataset.tab));
   const vehicleTabs=$('vehicleTabs');
   if(vehicleTabs){
     vehicleTabs.addEventListener('scroll',updateTabScrollButtons,{passive:true});
